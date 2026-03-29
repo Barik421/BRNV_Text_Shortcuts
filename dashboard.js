@@ -22,7 +22,6 @@ function renderStaticTexts() {
   document.getElementById("settingsButton").textContent = dashboardText("settings");
   document.getElementById("addShortcutButton").textContent = dashboardText("addShortcut");
   document.getElementById("addFolderButton").textContent = dashboardText("addFolder");
-  document.getElementById("backToFoldersButton").textContent = dashboardText("backToFolders");
   document.getElementById("dashboardSearch").placeholder = dashboardText("dashboardSearch");
   document.querySelector('label[for="dashboardSearch"]').textContent = dashboardText("dashboardSearch");
 }
@@ -77,7 +76,7 @@ function renderFolders() {
     card.className = "folder-card";
     card.innerHTML = `
       <div class="folder-card-head">
-        <div class="folder-icon">⌂</div>
+        <div class="folder-icon" aria-hidden="true"></div>
         <button class="folder-action folder-open" type="button"></button>
       </div>
       <div class="inline-row" style="margin-top: 16px;">
@@ -100,7 +99,7 @@ function renderFolders() {
 
     card.querySelector(".folder-open").addEventListener("click", () => {
       dashboardState.currentFolderId = folder.id;
-      renderFolderView();
+      openFolderScreen(folder.id);
     });
 
     card.querySelector(".folder-rename").addEventListener("click", async () => {
@@ -145,7 +144,10 @@ function renderFolders() {
 }
 
 function renderShortcuts() {
-  const node = document.getElementById("folderShortcutList");
+  const node = document.getElementById("folderScreenShortcutList");
+  if (!node) {
+    return;
+  }
   const shortcuts = getVisibleShortcuts();
   node.innerHTML = "";
 
@@ -185,28 +187,58 @@ function renderShortcuts() {
 }
 
 function renderFolderView() {
-  const folderSection = document.getElementById("folderViewSection");
-  const isSearching = Boolean(dashboardState.search.trim());
-  const selectedFolder = dashboardState.folders.find((item) => item.id === dashboardState.currentFolderId);
-
-  if (!selectedFolder && !isSearching) {
-    folderSection.classList.add("hidden");
-    return;
-  }
-
-  folderSection.classList.remove("hidden");
-  document.getElementById("folderViewTitle").textContent = isSearching
-    ? dashboardText("searchResults")
-    : selectedFolder.name;
-  document.getElementById("folderViewSubtitle").textContent = isSearching
-    ? dashboardText("searchResultsSubtitle")
-    : dashboardText("folderShortcuts");
-  renderShortcuts();
+  return;
 }
 
 function closeModal(root) {
   root.classList.add("hidden");
   root.innerHTML = "";
+}
+
+function closeFolderScreen() {
+  const root = document.getElementById("folderScreenRoot");
+  root.classList.add("hidden");
+  root.innerHTML = "";
+  dashboardState.currentFolderId = null;
+}
+
+function openFolderScreen(folderId) {
+  const root = document.getElementById("folderScreenRoot");
+  const folder = dashboardState.folders.find((item) => item.id === folderId);
+  if (!folder) {
+    return;
+  }
+
+  dashboardState.currentFolderId = folderId;
+  root.innerHTML = `
+    <div class="folder-screen-shell">
+      <div class="folder-screen-backdrop"></div>
+      <section class="folder-screen-panel">
+        <header class="folder-screen-header">
+          <div>
+            <p class="eyebrow">${dashboardText("folderViewEyebrow")}</p>
+            <h2 class="folder-screen-title">${folder.name}</h2>
+            <p class="folder-screen-subtitle">${dashboardText("folderShortcuts")}</p>
+          </div>
+          <div class="folder-screen-actions">
+            <button id="folderScreenAddShortcutButton" class="mini-button" type="button">${dashboardText("addShortcut")}</button>
+            <button id="folderScreenCloseButton" class="ghost-button" type="button">${dashboardText("close")}</button>
+          </div>
+        </header>
+        <section class="folder-screen-meta">
+          <span class="badge status">${dashboardText("shortcutCountLabel").replace("{count}", dashboardState.shortcuts.filter((item) => item.folderId === folderId).length)}</span>
+        </section>
+        <section id="folderScreenShortcutList" class="folder-screen-list shortcut-list"></section>
+      </section>
+    </div>
+  `;
+  root.classList.remove("hidden");
+
+  renderShortcuts();
+
+  root.querySelector("#folderScreenCloseButton").addEventListener("click", closeFolderScreen);
+  root.querySelector(".folder-screen-backdrop").addEventListener("click", closeFolderScreen);
+  root.querySelector("#folderScreenAddShortcutButton").addEventListener("click", () => openShortcutEditor());
 }
 
 function openInfoModal({ title, message }) {
@@ -565,7 +597,10 @@ async function refreshDashboard() {
   renderStaticTexts();
   renderSummary();
   renderFolders();
-  renderFolderView();
+
+  if (dashboardState.currentFolderId) {
+    openFolderScreen(dashboardState.currentFolderId);
+  }
 }
 
 async function addFolder() {
@@ -584,25 +619,31 @@ async function initDashboard() {
 
   document.getElementById("dashboardSearch").addEventListener("input", (event) => {
     dashboardState.search = event.target.value;
-    renderFolderView();
+
+    if (dashboardState.currentFolderId) {
+      renderShortcuts();
+    }
   });
 
   document.getElementById("addShortcutButton").addEventListener("click", () => openShortcutEditor());
   document.getElementById("addFolderButton").addEventListener("click", addFolder);
-  document.getElementById("backToFoldersButton").addEventListener("click", () => {
-    dashboardState.currentFolderId = null;
-    document.getElementById("folderViewSection").classList.add("hidden");
-  });
   document.getElementById("settingsButton").addEventListener("click", () => {
     window.location.href = chrome.runtime.getURL("settings.html");
   });
   document.getElementById("statisticsButton").addEventListener("click", () => renderStatsModal());
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && dashboardState.currentFolderId) {
+      closeFolderScreen();
+    }
+  });
 
   const params = new URLSearchParams(window.location.search);
   const shortcutId = params.get("shortcut");
   if (shortcutId) {
     dashboardState.currentFolderId = dashboardState.shortcuts.find((item) => item.id === shortcutId)?.folderId || null;
-    renderFolderView();
+    if (dashboardState.currentFolderId) {
+      openFolderScreen(dashboardState.currentFolderId);
+    }
     openShortcutEditor(shortcutId);
   }
 }

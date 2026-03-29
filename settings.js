@@ -17,6 +17,7 @@ function renderSettingsTexts() {
   document.getElementById("exportButton").textContent = settingsText("exportShortcuts");
   document.getElementById("importButton").textContent = settingsText("importShortcuts");
   document.getElementById("resetStatsButton").textContent = settingsText("resetStatistics");
+  document.getElementById("supportToggleButton").textContent = settingsText("supportButton");
 }
 
 async function loadSettings() {
@@ -127,6 +128,12 @@ async function initSettings() {
     }
   });
   document.getElementById("resetStatsButton").addEventListener("click", resetStatistics);
+  document.getElementById("supportToggleButton").addEventListener("click", () => {
+    document.getElementById("supportWalletPanel").classList.toggle("hidden");
+  });
+  document.getElementById("copyWalletButton").addEventListener("click", async () => {
+    await navigator.clipboard.writeText("TKQF5fJQ6VLZJka7xZyYKCUScWWJphm6tW");
+  });
 }
 
 document.addEventListener("DOMContentLoaded", initSettings);

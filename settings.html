@@ -10,7 +10,6 @@
     <main class="settings-shell">
       <header class="settings-header">
         <div>
-          <p class="eyebrow" data-i18n="brandEyebrow"></p>
           <h1 data-i18n="settingsTitle"></h1>
         </div>
         <button id="backButton" class="ghost-button" type="button"></button>
@@ -64,6 +63,26 @@
         </div>
         <input id="importFileInput" type="file" accept="application/json" hidden>
       </section>
+
+      <footer class="settings-footer">
+        <section class="support-card">
+          <div class="support-copy">
+            <h2 data-i18n="supportTitle"></h2>
+            <p data-i18n="supportDescription"></p>
+          </div>
+          <button id="supportToggleButton" class="support-button" type="button"></button>
+          <div id="supportWalletPanel" class="support-wallet hidden">
+            <p class="support-thanks" data-i18n="supportThanks"></p>
+            <p class="support-network">USDT TRC20</p>
+            <button id="copyWalletButton" class="wallet-code" type="button">TKQF5fJQ6VLZJka7xZyYKCUScWWJphm6tW</button>
+          </div>
+        </section>
+
+        <section class="contact-card">
+          <h2 data-i18n="contactTitle"></h2>
+          <a class="contact-link" href="mailto:mbrnvwork@gmail.com">mbrnvwork@gmail.com</a>
+        </section>
+      </footer>
     </main>
 
     <script src="shared/data.js"></script>

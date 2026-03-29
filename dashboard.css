@@ -100,6 +100,10 @@ textarea {
   font-weight: 700;
 }
 
+.eyebrow:empty {
+  display: none;
+}
+
 .hero-brand h1 {
   font-size: clamp(32px, 5vw, 44px);
   line-height: 1;
@@ -295,14 +299,36 @@ textarea {
 }
 
 .folder-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 16px;
-  display: grid;
-  place-items: center;
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-size: 22px;
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.95), rgba(246, 211, 213, 0.95) 58%, rgba(234, 151, 157, 0.95));
+  box-shadow: inset 0 0 0 1px rgba(217, 48, 54, 0.08);
+}
+
+.folder-icon::before,
+.folder-icon::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+}
+
+.folder-icon::before {
+  width: 18px;
+  height: 18px;
+  top: 10px;
+  left: 10px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.folder-icon::after {
+  width: 14px;
+  height: 14px;
+  right: 11px;
+  bottom: 11px;
+  background: linear-gradient(180deg, #e03d43 0%, #ca2b31 100%);
+  box-shadow: 0 8px 14px rgba(217, 48, 54, 0.22);
 }
 
 .folder-count,
@@ -356,6 +382,74 @@ textarea {
 .badge.status {
   background: #eff2f5;
   color: var(--text-soft);
+}
+
+.folder-screen-root {
+  position: fixed;
+  inset: 0;
+  z-index: 8;
+}
+
+.folder-screen-root.hidden {
+  display: none;
+}
+
+.folder-screen-shell,
+.folder-screen-backdrop {
+  position: absolute;
+  inset: 0;
+}
+
+.folder-screen-backdrop {
+  background: rgba(245, 246, 249, 0.74);
+  backdrop-filter: blur(18px);
+}
+
+.folder-screen-panel {
+  position: relative;
+  z-index: 1;
+  width: min(1240px, calc(100% - 40px));
+  min-height: calc(100vh - 40px);
+  margin: 20px auto;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 36px;
+  box-shadow: 0 28px 80px rgba(16, 18, 23, 0.14);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: modal-in 180ms ease both;
+}
+
+.folder-screen-header,
+.folder-screen-actions,
+.folder-screen-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.folder-screen-title,
+.folder-screen-subtitle {
+  margin: 0;
+}
+
+.folder-screen-title {
+  font-size: clamp(32px, 4vw, 42px);
+  line-height: 1;
+}
+
+.folder-screen-subtitle {
+  margin-top: 10px;
+  color: var(--text-soft);
+  font-size: 15px;
+}
+
+.folder-screen-list {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  align-content: start;
 }
 
 .modal-root {
@@ -561,6 +655,21 @@ textarea {
   .dashboard-shell {
     width: min(100% - 18px, 100%);
     margin-top: 18px;
+  }
+
+  .folder-screen-panel {
+    width: min(100% - 16px, 100%);
+    min-height: calc(100vh - 16px);
+    margin: 8px auto;
+    padding: 18px;
+    border-radius: 26px;
+  }
+
+  .folder-screen-header,
+  .folder-screen-actions,
+  .folder-screen-meta {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .hero-top,
