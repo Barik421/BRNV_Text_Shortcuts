@@ -6,7 +6,6 @@ const BRNVI18n = (() => {
       addFolderPrompt: "Enter a folder name.",
       addShortcut: "Add Shortcut",
       backToDashboard: "Back to dashboard",
-      backToFolders: "Back to folders",
       brandEyebrow: "",
       cancel: "Cancel",
       cannotDeleteTitle: "This folder stays",
@@ -20,7 +19,7 @@ const BRNVI18n = (() => {
       day: "Day",
       defaultFolderDeleteError: "The default folder cannot be deleted.",
       delete: "Delete",
-      deleteFolderConfirm: "Delete this folder? Its shortcuts will move to General.",
+      deleteFolderConfirm: "Are you sure you want to delete this folder? All shortcuts inside it will also be deleted.",
       deleteShortcutConfirm: "Delete this shortcut?",
       disabled: "Disabled",
       duplicate: "Duplicate",
@@ -57,6 +56,7 @@ const BRNVI18n = (() => {
       close: "Close",
       ok: "OK",
       openFolder: "Open",
+      yes: "Yes",
       periodUsage: "Usage in selected period",
       rename: "Rename",
       renameFolderTitle: "Rename folder",
@@ -66,6 +66,7 @@ const BRNVI18n = (() => {
       resetStatistics: "Reset statistics",
       resetStatisticsConfirm: "Reset all local usage statistics?",
       resetStatisticsDone: "Statistics have been reset.",
+      resetStatisticsInline: "Clear statistics",
       save: "Save",
       searchPlaceholder: "Search shortcuts",
       settings: "Settings",
@@ -100,7 +101,6 @@ const BRNVI18n = (() => {
       addFolderPrompt: "Введіть назву папки.",
       addShortcut: "Додати шорткат",
       backToDashboard: "Назад до панелі",
-      backToFolders: "Назад до папок",
       brandEyebrow: "",
       cancel: "Скасувати",
       cannotDeleteTitle: "Цю папку не можна видалити",
@@ -114,7 +114,7 @@ const BRNVI18n = (() => {
       day: "День",
       defaultFolderDeleteError: "Стандартну папку не можна видалити.",
       delete: "Видалити",
-      deleteFolderConfirm: "Видалити цю папку? Її шорткати буде перенесено в General.",
+      deleteFolderConfirm: "Ви дійсно впевнені, що хочете видалити цю папку? Усі шорткати всередині неї також буде видалено.",
       deleteShortcutConfirm: "Видалити цей шорткат?",
       disabled: "Вимкнено",
       duplicate: "Дублювати",
@@ -151,6 +151,7 @@ const BRNVI18n = (() => {
       close: "Закрити",
       ok: "OK",
       openFolder: "Відкрити",
+      yes: "Yes",
       periodUsage: "Використання за вибраний період",
       rename: "Перейменувати",
       renameFolderTitle: "Перейменувати папку",
@@ -160,6 +161,7 @@ const BRNVI18n = (() => {
       resetStatistics: "Скинути статистику",
       resetStatisticsConfirm: "Скинути всю локальну статистику використання?",
       resetStatisticsDone: "Статистику скинуто.",
+      resetStatisticsInline: "Очистити статистику",
       save: "Зберегти",
       searchPlaceholder: "Пошук шорткатів",
       settings: "Налаштування",
@@ -191,7 +193,13 @@ const BRNVI18n = (() => {
   };
 
   function t(language, key) {
-    return messages[language]?.[key] || messages.en[key] || key;
+    if (messages[language] && Object.prototype.hasOwnProperty.call(messages[language], key)) {
+      return messages[language][key];
+    }
+    if (Object.prototype.hasOwnProperty.call(messages.en, key)) {
+      return messages.en[key];
+    }
+    return key;
   }
 
   return { t };

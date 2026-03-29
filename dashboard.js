@@ -76,7 +76,12 @@ function renderFolders() {
     card.className = "folder-card";
     card.innerHTML = `
       <div class="folder-card-head">
-        <div class="folder-icon" aria-hidden="true"></div>
+        <div class="folder-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" class="folder-icon-svg">
+            <path d="M3.75 7.75A2.75 2.75 0 0 1 6.5 5h3.059c.73 0 1.42.327 1.885.891l.806.978c.19.23.472.365.77.365H17.5a2.75 2.75 0 0 1 2.75 2.75v5.516a2.75 2.75 0 0 1-2.75 2.75h-11A2.75 2.75 0 0 1 3.75 15.5V7.75Z" fill="currentColor"/>
+            <path d="M3.75 10.5h16.5" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.65"/>
+          </svg>
+        </div>
         <button class="folder-action folder-open" type="button"></button>
       </div>
       <div class="inline-row" style="margin-top: 16px;">
@@ -125,7 +130,7 @@ function renderFolders() {
       const confirmed = await openConfirmModal({
         title: dashboardText("deleteFolderTitle"),
         message: dashboardText("deleteFolderConfirm"),
-        confirmLabel: dashboardText("delete"),
+        confirmLabel: dashboardText("yes"),
         danger: true
       });
       if (!confirmed) {
@@ -244,10 +249,9 @@ function openFolderScreen(folderId) {
 function openInfoModal({ title, message }) {
   const root = document.getElementById("modalRoot");
   root.innerHTML = `
-    <div class="modal-panel modal-panel-compact">
+      <div class="modal-panel modal-panel-compact">
       <div class="modal-header">
         <div>
-          <p class="eyebrow">${dashboardText("brandEyebrow")}</p>
           <h2 class="modal-title">${title}</h2>
         </div>
         <button id="closeInfoButton" class="close-button" type="button">×</button>
@@ -277,7 +281,6 @@ function openConfirmModal({ title, message, confirmLabel, danger = false }) {
       <div class="modal-panel modal-panel-compact">
         <div class="modal-header">
           <div>
-            <p class="eyebrow">${dashboardText("brandEyebrow")}</p>
             <h2 class="modal-title">${title}</h2>
           </div>
           <button id="closeConfirmButton" class="close-button" type="button">×</button>
@@ -315,7 +318,6 @@ function openFolderModal(folder = null) {
       <div class="modal-panel modal-panel-compact">
         <div class="modal-header">
           <div>
-            <p class="eyebrow">${dashboardText("brandEyebrow")}</p>
             <h2 class="modal-title">${isRename ? dashboardText("renameFolderTitle") : dashboardText("addFolderTitle")}</h2>
           </div>
           <button id="closeFolderModalButton" class="close-button" type="button">×</button>
@@ -570,11 +572,29 @@ function renderStatsModal(period = "day") {
           <h3>${usageForPeriod}</h3>
         </article>
       </div>
+      <div class="modal-actions modal-actions-end stats-actions">
+        <button id="resetStatsInlineButton" class="danger-button" type="button">${dashboardText("resetStatisticsInline")}</button>
+      </div>
     </div>
   `;
 
   root.classList.remove("hidden");
   root.querySelector("#closeStatsButton").addEventListener("click", () => closeModal(root));
+  root.querySelector("#resetStatsInlineButton").addEventListener("click", async () => {
+    const confirmed = await openConfirmModal({
+      title: dashboardText("resetStatistics"),
+      message: dashboardText("resetStatisticsConfirm"),
+      confirmLabel: dashboardText("yes"),
+      danger: true
+    });
+    if (!confirmed) {
+      return;
+    }
+
+    await BRNVData.resetStats();
+    dashboardState.stats = await BRNVData.getLocalStats();
+    renderStatsModal(periodKey);
+  });
   root.addEventListener("click", (event) => {
     if (event.target === root) {
       closeModal(root);

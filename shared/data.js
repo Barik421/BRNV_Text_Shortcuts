@@ -179,9 +179,7 @@ const BRNVData = (() => {
 
     const data = await getSyncData();
     const nextFolders = data.folders.filter((item) => item.id !== folderId);
-    const nextShortcuts = data.shortcuts.map((shortcut) => (
-      shortcut.folderId === folderId ? { ...shortcut, folderId: DEFAULT_FOLDER_ID } : shortcut
-    ));
+    const nextShortcuts = data.shortcuts.filter((shortcut) => shortcut.folderId !== folderId);
     await setSyncData({ ...data, folders: nextFolders, shortcuts: nextShortcuts });
   }
 
