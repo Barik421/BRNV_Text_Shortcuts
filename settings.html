@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRNV Text Shortcuts Settings</title>
+    <link rel="stylesheet" href="settings.css">
+  </head>
+  <body>
+    <main class="settings-shell">
+      <header class="settings-header">
+        <div>
+          <p class="eyebrow" data-i18n="brandEyebrow"></p>
+          <h1 data-i18n="settingsTitle"></h1>
+        </div>
+        <button id="backButton" class="ghost-button" type="button"></button>
+      </header>
+
+      <section class="settings-card">
+        <div class="setting-row">
+          <div>
+            <h2 data-i18n="language"></h2>
+            <p data-i18n="languageHelp"></p>
+          </div>
+          <select id="languageSelect" class="field-select">
+            <option value="en">English</option>
+            <option value="uk">Українська</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <h2 data-i18n="caseSensitive"></h2>
+            <p data-i18n="caseSensitiveHelp"></p>
+          </div>
+          <label class="switch">
+            <input id="caseSensitiveToggle" type="checkbox">
+            <span class="switch-track"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <h2 data-i18n="expansionEnabled"></h2>
+            <p data-i18n="expansionEnabledHelp"></p>
+          </div>
+          <label class="switch">
+            <input id="expansionToggle" type="checkbox">
+            <span class="switch-track"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <h2 data-i18n="syncStatus"></h2>
+            <p id="syncInfoText"></p>
+          </div>
+        </div>
+
+        <div class="actions-grid">
+          <button id="exportButton" class="primary-button" type="button"></button>
+          <button id="importButton" class="secondary-button" type="button"></button>
+          <button id="resetStatsButton" class="danger-button" type="button"></button>
+        </div>
+        <input id="importFileInput" type="file" accept="application/json" hidden>
+      </section>
+    </main>
+
+    <script src="shared/data.js"></script>
+    <script src="shared/i18n.js"></script>
+    <script src="settings.js"></script>
+  </body>
+</html>

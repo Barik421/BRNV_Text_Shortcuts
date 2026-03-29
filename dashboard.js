@@ -1,0 +1,610 @@
+const dashboardState = {
+  folders: [],
+  shortcuts: [],
+  settings: null,
+  stats: null,
+  language: "en",
+  currentFolderId: null,
+  search: ""
+};
+
+function dashboardText(key) {
+  return BRNVI18n.t(dashboardState.language, key);
+}
+
+function renderStaticTexts() {
+  document.documentElement.lang = dashboardState.language;
+  document.querySelectorAll("[data-i18n]").forEach((node) => {
+    node.textContent = dashboardText(node.dataset.i18n);
+  });
+
+  document.getElementById("statisticsButton").textContent = dashboardText("statistics");
+  document.getElementById("settingsButton").textContent = dashboardText("settings");
+  document.getElementById("addShortcutButton").textContent = dashboardText("addShortcut");
+  document.getElementById("addFolderButton").textContent = dashboardText("addFolder");
+  document.getElementById("backToFoldersButton").textContent = dashboardText("backToFolders");
+  document.getElementById("dashboardSearch").placeholder = dashboardText("dashboardSearch");
+  document.querySelector('label[for="dashboardSearch"]').textContent = dashboardText("dashboardSearch");
+}
+
+function getVisibleShortcuts() {
+  const query = dashboardState.search.trim().toLowerCase();
+  let shortcuts = dashboardState.shortcuts;
+
+  if (dashboardState.currentFolderId) {
+    shortcuts = shortcuts.filter((item) => item.folderId === dashboardState.currentFolderId);
+  }
+
+  if (!query) {
+    return shortcuts;
+  }
+
+  return shortcuts.filter((shortcut) => {
+    const haystack = [shortcut.name, shortcut.trigger, shortcut.content].join("\n").toLowerCase();
+    return haystack.includes(query);
+  });
+}
+
+function createSummaryCard(label, value) {
+  const card = document.createElement("article");
+  card.className = "summary-card";
+  card.innerHTML = `<p class="summary-label"></p><p class="summary-value"></p>`;
+  card.querySelector(".summary-label").textContent = label;
+  card.querySelector(".summary-value").textContent = value;
+  return card;
+}
+
+function renderSummary() {
+  const node = document.getElementById("dashboardSummary");
+  const folderCount = dashboardState.folders.length;
+  const enabledCount = dashboardState.shortcuts.filter((item) => item.enabled).length;
+  const totalUsage = dashboardState.stats?.totalExpansions || 0;
+
+  node.innerHTML = "";
+  node.appendChild(createSummaryCard(dashboardText("summaryFolders"), String(folderCount)));
+  node.appendChild(createSummaryCard(dashboardText("summaryShortcuts"), String(dashboardState.shortcuts.length)));
+  node.appendChild(createSummaryCard(dashboardText("summaryEnabled"), String(enabledCount)));
+  node.appendChild(createSummaryCard(dashboardText("summaryUsage"), String(totalUsage)));
+}
+
+function renderFolders() {
+  const grid = document.getElementById("foldersGrid");
+  grid.innerHTML = "";
+
+  dashboardState.folders.forEach((folder) => {
+    const count = dashboardState.shortcuts.filter((item) => item.folderId === folder.id).length;
+    const card = document.createElement("article");
+    card.className = "folder-card";
+    card.innerHTML = `
+      <div class="folder-card-head">
+        <div class="folder-icon">⌂</div>
+        <button class="folder-action folder-open" type="button"></button>
+      </div>
+      <div class="inline-row" style="margin-top: 16px;">
+        <div>
+          <h3></h3>
+          <p class="folder-count"></p>
+        </div>
+      </div>
+      <div class="folder-footer">
+        <button class="folder-action folder-rename" type="button"></button>
+        <button class="folder-action folder-delete" type="button"></button>
+      </div>
+    `;
+
+    card.querySelector("h3").textContent = folder.name;
+    card.querySelector(".folder-count").textContent = dashboardText("shortcutCountLabel").replace("{count}", count);
+    card.querySelector(".folder-open").textContent = dashboardText("openFolder");
+    card.querySelector(".folder-rename").textContent = dashboardText("rename");
+    card.querySelector(".folder-delete").textContent = dashboardText("delete");
+
+    card.querySelector(".folder-open").addEventListener("click", () => {
+      dashboardState.currentFolderId = folder.id;
+      renderFolderView();
+    });
+
+    card.querySelector(".folder-rename").addEventListener("click", async () => {
+      const nextName = await openFolderModal(folder);
+      if (!nextName) {
+        return;
+      }
+
+      await BRNVData.upsertFolder({ ...folder, name: nextName.trim() });
+      await refreshDashboard();
+    });
+
+    card.querySelector(".folder-delete").addEventListener("click", async () => {
+      const isDefaultFolder = folder.id === BRNVData.DEFAULT_FOLDER_ID;
+      if (isDefaultFolder) {
+        openInfoModal({
+          title: dashboardText("cannotDeleteTitle"),
+          message: dashboardText("defaultFolderDeleteError")
+        });
+        return;
+      }
+
+      const confirmed = await openConfirmModal({
+        title: dashboardText("deleteFolderTitle"),
+        message: dashboardText("deleteFolderConfirm"),
+        confirmLabel: dashboardText("delete"),
+        danger: true
+      });
+      if (!confirmed) {
+        return;
+      }
+
+      await BRNVData.deleteFolder(folder.id);
+      if (dashboardState.currentFolderId === folder.id) {
+        dashboardState.currentFolderId = null;
+      }
+      await refreshDashboard();
+    });
+
+    grid.appendChild(card);
+  });
+}
+
+function renderShortcuts() {
+  const node = document.getElementById("folderShortcutList");
+  const shortcuts = getVisibleShortcuts();
+  node.innerHTML = "";
+
+  if (!shortcuts.length) {
+    const empty = document.createElement("div");
+    empty.className = "summary-card";
+    empty.innerHTML = `<p class="summary-label">${dashboardText("emptyShortcuts")}</p>`;
+    node.appendChild(empty);
+    return;
+  }
+
+  shortcuts.forEach((shortcut) => {
+    const card = document.createElement("article");
+    card.className = `shortcut-card ${shortcut.enabled ? "" : "disabled"}`;
+    card.innerHTML = `
+      <div class="shortcut-head">
+        <h3></h3>
+        <span class="badge trigger"></span>
+      </div>
+      <p class="shortcut-preview"></p>
+      <div class="inline-row">
+        <span class="badge status"></span>
+        <span class="shortcut-meta"></span>
+      </div>
+    `;
+
+    card.querySelector("h3").textContent = shortcut.name;
+    card.querySelector(".badge.trigger").textContent = shortcut.trigger;
+    card.querySelector(".shortcut-preview").textContent = shortcut.content.replace(/\s+/g, " ").trim().slice(0, 120);
+    card.querySelector(".badge.status").textContent = shortcut.enabled ? dashboardText("enabled") : dashboardText("disabled");
+
+    const folder = dashboardState.folders.find((item) => item.id === shortcut.folderId);
+    card.querySelector(".shortcut-meta").textContent = folder ? folder.name : dashboardText("generalFolder");
+    card.addEventListener("click", () => openShortcutEditor(shortcut.id));
+    node.appendChild(card);
+  });
+}
+
+function renderFolderView() {
+  const folderSection = document.getElementById("folderViewSection");
+  const isSearching = Boolean(dashboardState.search.trim());
+  const selectedFolder = dashboardState.folders.find((item) => item.id === dashboardState.currentFolderId);
+
+  if (!selectedFolder && !isSearching) {
+    folderSection.classList.add("hidden");
+    return;
+  }
+
+  folderSection.classList.remove("hidden");
+  document.getElementById("folderViewTitle").textContent = isSearching
+    ? dashboardText("searchResults")
+    : selectedFolder.name;
+  document.getElementById("folderViewSubtitle").textContent = isSearching
+    ? dashboardText("searchResultsSubtitle")
+    : dashboardText("folderShortcuts");
+  renderShortcuts();
+}
+
+function closeModal(root) {
+  root.classList.add("hidden");
+  root.innerHTML = "";
+}
+
+function openInfoModal({ title, message }) {
+  const root = document.getElementById("modalRoot");
+  root.innerHTML = `
+    <div class="modal-panel modal-panel-compact">
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow">${dashboardText("brandEyebrow")}</p>
+          <h2 class="modal-title">${title}</h2>
+        </div>
+        <button id="closeInfoButton" class="close-button" type="button">×</button>
+      </div>
+      <p class="modal-copy">${message}</p>
+      <div class="modal-actions modal-actions-end">
+        <button id="closeInfoPrimaryButton" class="primary-button" type="button">${dashboardText("ok")}</button>
+      </div>
+    </div>
+  `;
+  root.classList.remove("hidden");
+
+  const close = () => closeModal(root);
+  root.querySelector("#closeInfoButton").addEventListener("click", close);
+  root.querySelector("#closeInfoPrimaryButton").addEventListener("click", close);
+  root.addEventListener("click", (event) => {
+    if (event.target === root) {
+      close();
+    }
+  }, { once: true });
+}
+
+function openConfirmModal({ title, message, confirmLabel, danger = false }) {
+  return new Promise((resolve) => {
+    const root = document.getElementById("modalRoot");
+    root.innerHTML = `
+      <div class="modal-panel modal-panel-compact">
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">${dashboardText("brandEyebrow")}</p>
+            <h2 class="modal-title">${title}</h2>
+          </div>
+          <button id="closeConfirmButton" class="close-button" type="button">×</button>
+        </div>
+        <p class="modal-copy">${message}</p>
+        <div class="modal-actions modal-actions-end">
+          <button id="cancelConfirmButton" class="secondary-button" type="button">${dashboardText("cancel")}</button>
+          <button id="approveConfirmButton" class="${danger ? "danger-button" : "primary-button"}" type="button">${confirmLabel}</button>
+        </div>
+      </div>
+    `;
+    root.classList.remove("hidden");
+
+    const finish = (value) => {
+      closeModal(root);
+      resolve(value);
+    };
+
+    root.querySelector("#closeConfirmButton").addEventListener("click", () => finish(false));
+    root.querySelector("#cancelConfirmButton").addEventListener("click", () => finish(false));
+    root.querySelector("#approveConfirmButton").addEventListener("click", () => finish(true));
+    root.addEventListener("click", (event) => {
+      if (event.target === root) {
+        finish(false);
+      }
+    }, { once: true });
+  });
+}
+
+function openFolderModal(folder = null) {
+  return new Promise((resolve) => {
+    const root = document.getElementById("modalRoot");
+    const isRename = Boolean(folder);
+    root.innerHTML = `
+      <div class="modal-panel modal-panel-compact">
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">${dashboardText("brandEyebrow")}</p>
+            <h2 class="modal-title">${isRename ? dashboardText("renameFolderTitle") : dashboardText("addFolderTitle")}</h2>
+          </div>
+          <button id="closeFolderModalButton" class="close-button" type="button">×</button>
+        </div>
+        <form id="folderModalForm" class="editor-form">
+          <div class="field-group">
+            <label class="field-label" for="folderModalName">${dashboardText("folderName")}</label>
+            <input id="folderModalName" class="field-input" type="text" maxlength="60" value="${folder ? BRNVData.escapeHtml(folder.name) : ""}" autocomplete="off">
+            <div id="folderModalError" class="error-text"></div>
+          </div>
+          <div class="modal-actions modal-actions-end">
+            <button id="cancelFolderModalButton" class="secondary-button" type="button">${dashboardText("cancel")}</button>
+            <button class="primary-button" type="submit">${isRename ? dashboardText("save") : dashboardText("create")}</button>
+          </div>
+        </form>
+      </div>
+    `;
+    root.classList.remove("hidden");
+
+    const input = root.querySelector("#folderModalName");
+    input.focus();
+    input.select();
+
+    const finish = (value) => {
+      closeModal(root);
+      resolve(value);
+    };
+
+    root.querySelector("#closeFolderModalButton").addEventListener("click", () => finish(null));
+    root.querySelector("#cancelFolderModalButton").addEventListener("click", () => finish(null));
+    root.addEventListener("click", (event) => {
+      if (event.target === root) {
+        finish(null);
+      }
+    }, { once: true });
+
+    root.querySelector("#folderModalForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const value = input.value.trim();
+      if (!value) {
+        root.querySelector("#folderModalError").textContent = dashboardText("errorFolderRequired");
+        return;
+      }
+      finish(value);
+    });
+  });
+}
+
+function createSwitch(id, checked) {
+  return `
+    <label class="switch" for="${id}">
+      <input id="${id}" type="checkbox" ${checked ? "checked" : ""}>
+      <span class="switch-track"></span>
+    </label>
+  `;
+}
+
+function openShortcutEditor(shortcutId = null) {
+  const root = document.getElementById("modalRoot");
+  const shortcut = shortcutId ? dashboardState.shortcuts.find((item) => item.id === shortcutId) : null;
+  const title = shortcut ? dashboardText("editShortcut") : dashboardText("createShortcut");
+
+  root.innerHTML = `
+    <div class="modal-panel">
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow">${dashboardText("editorEyebrow")}</p>
+          <h2 class="modal-title">${title}</h2>
+        </div>
+        <button id="closeEditorButton" class="close-button" type="button">×</button>
+      </div>
+      <form id="shortcutForm" class="editor-form">
+        <div class="field-group">
+          <label class="field-label" for="shortcutName">${dashboardText("name")}</label>
+          <input id="shortcutName" class="field-input" type="text" maxlength="80" value="${shortcut ? BRNVData.escapeHtml(shortcut.name) : ""}">
+          <div id="nameError" class="error-text"></div>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="shortcutTrigger">${dashboardText("triggerCode")}</label>
+          <input id="shortcutTrigger" class="field-input" type="text" maxlength="80" autocapitalize="off" autocomplete="off" spellcheck="false" value="${shortcut ? BRNVData.escapeHtml(shortcut.trigger) : ""}">
+          <div class="field-help">${dashboardText("triggerHelp")}</div>
+          <div id="triggerError" class="error-text"></div>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="shortcutFolder">${dashboardText("folder")}</label>
+          <select id="shortcutFolder" class="field-select"></select>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="shortcutContent">${dashboardText("textContent")}</label>
+          <textarea id="shortcutContent" class="field-textarea"></textarea>
+          <div id="contentError" class="error-text"></div>
+        </div>
+        <div class="toggle-row">
+          <div>
+            <div class="field-label">${dashboardText("enabled")}</div>
+            <div class="field-help">${dashboardText("enabledHelp")}</div>
+          </div>
+          ${createSwitch("shortcutEnabled", shortcut ? shortcut.enabled : true)}
+        </div>
+        <div class="modal-actions">
+          <div class="inline-row">
+            ${shortcut ? '<button id="duplicateShortcutButton" class="secondary-button" type="button"></button>' : ""}
+            ${shortcut ? '<button id="deleteShortcutButton" class="danger-button" type="button"></button>' : ""}
+          </div>
+          <div class="inline-row">
+            <button id="cancelShortcutButton" class="secondary-button" type="button"></button>
+            <button class="primary-button" type="submit"></button>
+          </div>
+        </div>
+      </form>
+    </div>
+  `;
+
+  root.classList.remove("hidden");
+
+  const folderSelect = root.querySelector("#shortcutFolder");
+  dashboardState.folders.forEach((folder) => {
+    const option = document.createElement("option");
+    option.value = folder.id;
+    option.textContent = folder.name;
+    if (folder.id === (shortcut?.folderId || dashboardState.currentFolderId || BRNVData.DEFAULT_FOLDER_ID)) {
+      option.selected = true;
+    }
+    folderSelect.appendChild(option);
+  });
+
+  root.querySelector("#shortcutContent").value = shortcut?.content || "";
+  root.querySelector(".primary-button").textContent = dashboardText("save");
+  root.querySelector("#cancelShortcutButton").textContent = dashboardText("cancel");
+
+  if (shortcut) {
+    root.querySelector("#duplicateShortcutButton").textContent = dashboardText("duplicate");
+    root.querySelector("#deleteShortcutButton").textContent = dashboardText("delete");
+  }
+
+  function validateForm(values) {
+    const errors = { name: "", trigger: "", content: "" };
+
+    if (!values.name.trim()) {
+      errors.name = dashboardText("errorNameRequired");
+    }
+
+    if (!values.trigger.trim()) {
+      errors.trigger = dashboardText("errorTriggerRequired");
+    } else {
+      const validation = BRNVData.validateTrigger(values.trigger.trim(), dashboardState.shortcuts, shortcut?.id, dashboardState.settings.caseSensitive);
+      if (!validation.ok) {
+        errors.trigger = dashboardText(validation.errorKey);
+      }
+    }
+
+    if (!values.content.trim()) {
+      errors.content = dashboardText("errorContentRequired");
+    }
+
+    root.querySelector("#nameError").textContent = errors.name;
+    root.querySelector("#triggerError").textContent = errors.trigger;
+    root.querySelector("#contentError").textContent = errors.content;
+
+    return !errors.name && !errors.trigger && !errors.content;
+  }
+
+  root.querySelector("#closeEditorButton").addEventListener("click", () => closeModal(root));
+  root.querySelector("#cancelShortcutButton").addEventListener("click", () => closeModal(root));
+  root.addEventListener("click", (event) => {
+    if (event.target === root) {
+      closeModal(root);
+    }
+  });
+
+  if (shortcut) {
+    root.querySelector("#duplicateShortcutButton").addEventListener("click", async () => {
+      const duplicate = BRNVData.makeDuplicateShortcut(shortcut, dashboardState.shortcuts, dashboardState.settings.caseSensitive);
+      await BRNVData.upsertShortcut(duplicate, dashboardState.settings.caseSensitive);
+      closeModal(root);
+      await refreshDashboard();
+      openShortcutEditor(duplicate.id);
+    });
+
+    root.querySelector("#deleteShortcutButton").addEventListener("click", async () => {
+      const confirmed = await openConfirmModal({
+        title: dashboardText("deleteShortcutTitle"),
+        message: dashboardText("deleteShortcutConfirm"),
+        confirmLabel: dashboardText("delete"),
+        danger: true
+      });
+      if (!confirmed) {
+        return;
+      }
+
+      await BRNVData.deleteShortcut(shortcut.id);
+      closeModal(root);
+      await refreshDashboard();
+    });
+  }
+
+  root.querySelector("#shortcutForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const values = {
+      id: shortcut?.id,
+      name: root.querySelector("#shortcutName").value,
+      trigger: root.querySelector("#shortcutTrigger").value,
+      folderId: root.querySelector("#shortcutFolder").value,
+      content: root.querySelector("#shortcutContent").value,
+      enabled: root.querySelector("#shortcutEnabled").checked
+    };
+
+    if (!validateForm(values)) {
+      return;
+    }
+
+    await BRNVData.upsertShortcut(values, dashboardState.settings.caseSensitive);
+    closeModal(root);
+    await refreshDashboard();
+  });
+}
+
+function renderStatsModal(period = "day") {
+  const root = document.getElementById("statsRoot");
+  const periodKey = period.toLowerCase();
+  const usageForPeriod = BRNVData.getUsageForPeriod(dashboardState.stats, periodKey);
+
+  root.innerHTML = `
+    <div class="modal-panel">
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow">${dashboardText("statistics")}</p>
+          <h2 class="stats-title">${dashboardText("statisticsTitle")}</h2>
+        </div>
+        <button id="closeStatsButton" class="close-button" type="button">×</button>
+      </div>
+      <div class="stats-top">
+        <div class="period-tabs">
+          <button class="chip-button ${periodKey === "day" ? "active" : ""}" data-period="day" type="button">${dashboardText("day")}</button>
+          <button class="chip-button ${periodKey === "month" ? "active" : ""}" data-period="month" type="button">${dashboardText("month")}</button>
+          <button class="chip-button ${periodKey === "year" ? "active" : ""}" data-period="year" type="button">${dashboardText("year")}</button>
+        </div>
+        <p class="subtle-text">${dashboardText("statisticsSubtitle")}</p>
+      </div>
+      <div class="stats-grid">
+        <article class="stats-card">
+          <p>${dashboardText("totalShortcuts")}</p>
+          <h3>${dashboardState.shortcuts.length}</h3>
+        </article>
+        <article class="stats-card">
+          <p>${dashboardText("totalUsage")}</p>
+          <h3>${dashboardState.stats?.totalExpansions || 0}</h3>
+        </article>
+        <article class="stats-card">
+          <p>${dashboardText("periodUsage")}</p>
+          <h3>${usageForPeriod}</h3>
+        </article>
+      </div>
+    </div>
+  `;
+
+  root.classList.remove("hidden");
+  root.querySelector("#closeStatsButton").addEventListener("click", () => closeModal(root));
+  root.addEventListener("click", (event) => {
+    if (event.target === root) {
+      closeModal(root);
+    }
+  }, { once: true });
+
+  root.querySelectorAll("[data-period]").forEach((button) => {
+    button.addEventListener("click", () => renderStatsModal(button.dataset.period));
+  });
+}
+
+async function refreshDashboard() {
+  const syncData = await BRNVData.getSyncData();
+  dashboardState.folders = syncData.folders;
+  dashboardState.shortcuts = syncData.shortcuts;
+  dashboardState.settings = syncData.settings;
+  dashboardState.language = syncData.settings.language;
+  dashboardState.stats = await BRNVData.getLocalStats();
+
+  renderStaticTexts();
+  renderSummary();
+  renderFolders();
+  renderFolderView();
+}
+
+async function addFolder() {
+  const name = await openFolderModal();
+  if (!name) {
+    return;
+  }
+
+  await BRNVData.upsertFolder({ name: name.trim() });
+  await refreshDashboard();
+}
+
+async function initDashboard() {
+  await BRNVData.ensureDefaults();
+  await refreshDashboard();
+
+  document.getElementById("dashboardSearch").addEventListener("input", (event) => {
+    dashboardState.search = event.target.value;
+    renderFolderView();
+  });
+
+  document.getElementById("addShortcutButton").addEventListener("click", () => openShortcutEditor());
+  document.getElementById("addFolderButton").addEventListener("click", addFolder);
+  document.getElementById("backToFoldersButton").addEventListener("click", () => {
+    dashboardState.currentFolderId = null;
+    document.getElementById("folderViewSection").classList.add("hidden");
+  });
+  document.getElementById("settingsButton").addEventListener("click", () => {
+    window.location.href = chrome.runtime.getURL("settings.html");
+  });
+  document.getElementById("statisticsButton").addEventListener("click", () => renderStatsModal());
+
+  const params = new URLSearchParams(window.location.search);
+  const shortcutId = params.get("shortcut");
+  if (shortcutId) {
+    dashboardState.currentFolderId = dashboardState.shortcuts.find((item) => item.id === shortcutId)?.folderId || null;
+    renderFolderView();
+    openShortcutEditor(shortcutId);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", initDashboard);

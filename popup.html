@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRNV Text Shortcuts</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main class="popup-shell">
+      <header class="popup-topbar">
+        <button id="openDashboardButton" class="icon-button primary-chip" type="button"></button>
+        <button id="openSettingsButton" class="icon-button" type="button" aria-label="Settings"></button>
+      </header>
+
+      <section class="popup-search-wrap glass-card">
+        <label class="sr-only" for="popupSearch"></label>
+        <input id="popupSearch" class="search-input" type="search" autocomplete="off">
+      </section>
+
+      <section class="popup-list-wrap">
+        <div id="popupEmptyState" class="empty-state hidden"></div>
+        <div id="popupResults" class="result-list"></div>
+      </section>
+    </main>
+
+    <script src="shared/data.js"></script>
+    <script src="shared/i18n.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

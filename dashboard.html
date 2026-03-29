@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRNV Text Shortcuts</title>
+    <link rel="stylesheet" href="dashboard.css">
+  </head>
+  <body>
+    <div class="app-background"></div>
+    <main class="dashboard-shell">
+      <header class="hero-panel glass-panel">
+        <div class="hero-top">
+          <div class="hero-brand">
+            <p class="eyebrow" data-i18n="brandEyebrow"></p>
+            <h1 data-i18n="dashboardTitle"></h1>
+          </div>
+          <div class="hero-actions">
+            <button id="statisticsButton" class="ghost-button" type="button"></button>
+            <button id="settingsButton" class="ghost-button" type="button"></button>
+          </div>
+        </div>
+        <div class="hero-search-wrap">
+          <label class="sr-only" for="dashboardSearch"></label>
+          <input id="dashboardSearch" class="hero-search" type="search" autocomplete="off">
+        </div>
+        <div class="hero-cta">
+          <button id="addShortcutButton" class="add-button" type="button"></button>
+        </div>
+      </header>
+
+      <section id="dashboardSummary" class="summary-row"></section>
+
+      <section id="foldersSection">
+        <div class="section-head">
+          <h2 data-i18n="folders"></h2>
+          <button id="addFolderButton" class="mini-button" type="button"></button>
+        </div>
+        <div id="foldersGrid" class="folder-grid"></div>
+      </section>
+
+      <section id="folderViewSection" class="hidden">
+        <div class="section-head">
+          <button id="backToFoldersButton" class="back-button" type="button"></button>
+          <div class="folder-title-wrap">
+            <h2 id="folderViewTitle"></h2>
+            <p id="folderViewSubtitle"></p>
+          </div>
+        </div>
+        <div id="folderShortcutList" class="shortcut-list"></div>
+      </section>
+    </main>
+
+    <div id="modalRoot" class="modal-root hidden"></div>
+    <div id="statsRoot" class="modal-root hidden"></div>
+
+    <script src="shared/data.js"></script>
+    <script src="shared/i18n.js"></script>
+    <script src="dashboard.js"></script>
+  </body>
+</html>
