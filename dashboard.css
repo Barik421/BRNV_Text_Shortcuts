@@ -341,7 +341,7 @@ textarea {
 
 .search-results-list {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   max-height: min(420px, 48vh);
   overflow-y: auto;
   padding-right: 2px;
@@ -351,8 +351,8 @@ textarea {
   border: 0;
   text-align: left;
   width: 100%;
-  padding: 14px 16px;
-  border-radius: 18px;
+  padding: 12px 14px;
+  border-radius: 16px;
   background: color-mix(in srgb, var(--panel-muted) 94%, #ffffff 6%);
   cursor: pointer;
   transition: transform var(--transition), background var(--transition), box-shadow var(--transition), border-color var(--transition);
@@ -372,15 +372,24 @@ textarea {
 }
 
 .search-result-title {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
 }
 
 .search-result-copy {
-  margin-top: 8px;
+  margin-top: 6px;
   color: var(--text-soft);
-  font-size: 13px;
-  line-height: 1.5;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.search-result-item .inline-row {
+  margin-top: 8px;
+}
+
+.search-result-item .badge {
+  padding: 5px 9px;
+  font-size: 11px;
 }
 
 .hero-cta {
