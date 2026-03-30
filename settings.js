@@ -88,6 +88,7 @@ function renderSettingsTexts() {
   document.getElementById("backButton").textContent = settingsText("backToDashboard");
   document.getElementById("exportButton").textContent = settingsText("exportShortcuts");
   document.getElementById("importButton").textContent = settingsText("importShortcuts");
+  document.getElementById("disableAllShortcutsButton").textContent = settingsText("disableAllShortcuts");
   document.getElementById("resetStatsButton").textContent = settingsText("resetStatistics");
   document.getElementById("supportToggleButton").textContent = settingsText("supportButton");
 }
@@ -188,6 +189,23 @@ async function resetStatistics() {
   });
 }
 
+async function disableAllShortcutsAction() {
+  const confirmed = await openSettingsConfirmModal({
+    title: settingsText("disableAllShortcuts"),
+    message: settingsText("disableAllShortcutsConfirm"),
+    confirmLabel: settingsText("yes")
+  });
+  if (!confirmed) {
+    return;
+  }
+
+  await BRNVData.disableAllShortcuts();
+  await openSettingsInfoModal({
+    title: settingsText("disableAllShortcuts"),
+    message: settingsText("disableAllShortcutsDone")
+  });
+}
+
 async function initSettings() {
   await loadSettings();
 
@@ -218,6 +236,7 @@ async function initSettings() {
       event.target.value = "";
     }
   });
+  document.getElementById("disableAllShortcutsButton").addEventListener("click", disableAllShortcutsAction);
   document.getElementById("resetStatsButton").addEventListener("click", resetStatistics);
   document.getElementById("supportToggleButton").addEventListener("click", () => {
     document.getElementById("supportWalletPanel").classList.toggle("hidden");

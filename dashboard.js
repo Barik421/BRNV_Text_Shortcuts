@@ -726,6 +726,16 @@ async function initDashboard() {
   await BRNVData.ensureDefaults();
   await refreshDashboard();
 
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName === "sync" && (changes.shortcuts || changes.folders || changes.settings)) {
+      refreshDashboard();
+    }
+
+    if (areaName === "local" && changes.stats) {
+      refreshDashboard();
+    }
+  });
+
   document.getElementById("dashboardSearch").addEventListener("input", (event) => {
     dashboardState.search = event.target.value;
 

@@ -227,6 +227,14 @@ const BRNVData = (() => {
     });
   }
 
+  async function disableAllShortcuts() {
+    const data = await getSyncData();
+    await setSyncData({
+      ...data,
+      shortcuts: data.shortcuts.map((shortcut) => ({ ...shortcut, enabled: false, updatedAt: nowIso() }))
+    });
+  }
+
   function makeDuplicateShortcut(shortcut, shortcuts, caseSensitive) {
     let copyIndex = 2;
     let trigger = `${shortcut.trigger}_copy`;
@@ -365,6 +373,7 @@ const BRNVData = (() => {
     upsertShortcut,
     deleteFolder,
     deleteShortcut,
+    disableAllShortcuts,
     validateShortcutCollection,
     validateTrigger
   };

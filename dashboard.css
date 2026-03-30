@@ -571,7 +571,8 @@ textarea {
 }
 
 .switch input:checked + .switch-track {
-  background: rgba(217, 48, 54, 0.48);
+  background: linear-gradient(180deg, #ef4b50 0%, #c91e24 100%);
+  box-shadow: 0 12px 18px rgba(217, 48, 54, 0.24);
 }
 
 .switch input:checked + .switch-track::after {
