@@ -12,6 +12,24 @@ function dashboardText(key) {
   return BRNVI18n.t(dashboardState.language, key);
 }
 
+function getDashboardLocale() {
+  return dashboardState.language === "uk" ? "uk-UA" : "en-US";
+}
+
+function formatChartLabel(date, periodKey) {
+  const locale = getDashboardLocale();
+
+  if (periodKey === "day") {
+    return new Intl.DateTimeFormat(locale, { weekday: "short" }).format(date);
+  }
+
+  if (periodKey === "month") {
+    return new Intl.DateTimeFormat(locale, { month: "short" }).format(date);
+  }
+
+  return String(date.getFullYear());
+}
+
 function applyDashboardTheme(isDark) {
   document.documentElement.dataset.theme = isDark ? "dark" : "light";
 }
@@ -68,7 +86,7 @@ function getChartSeries(periodKey) {
       date.setDate(now.getDate() - index);
       const key = date.toISOString().slice(0, 10);
       series.push({
-        label: key.slice(5),
+        label: formatChartLabel(date, "day"),
         value: stats.daily?.[key] || 0
       });
     }
@@ -80,7 +98,7 @@ function getChartSeries(periodKey) {
       const date = new Date(now.getFullYear(), now.getMonth() - index, 1);
       const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
       series.push({
-        label: key.slice(5),
+        label: formatChartLabel(date, "month"),
         value: stats.monthly?.[key] || 0
       });
     }
@@ -88,9 +106,10 @@ function getChartSeries(periodKey) {
   }
 
   for (let index = 4; index >= 0; index -= 1) {
-    const year = String(now.getFullYear() - index);
+    const date = new Date(now.getFullYear() - index, 0, 1);
+    const year = String(date.getFullYear());
     series.push({
-      label: year,
+      label: formatChartLabel(date, "year"),
       value: stats.yearly?.[year] || 0
     });
   }
