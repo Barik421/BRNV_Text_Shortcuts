@@ -8,19 +8,80 @@
   </head>
   <body>
     <main class="popup-shell">
-      <header class="popup-topbar">
-        <button id="openDashboardButton" class="icon-button primary-chip" type="button"></button>
-        <button id="openSettingsButton" class="icon-button" type="button" aria-label="Settings"></button>
-      </header>
+      <section id="popupListView">
+        <header class="popup-topbar">
+          <button id="openDashboardButton" class="icon-button primary-chip" type="button"></button>
+          <button id="openSettingsButton" class="icon-button" type="button" aria-label="Settings"></button>
+        </header>
 
-      <section class="popup-search-wrap glass-card">
-        <label class="sr-only" for="popupSearch"></label>
-        <input id="popupSearch" class="search-input" type="search" autocomplete="off">
+        <section class="popup-search-wrap glass-card">
+          <label class="sr-only" for="popupSearch"></label>
+          <input id="popupSearch" class="search-input" type="search" autocomplete="off">
+        </section>
+
+        <section class="popup-list-wrap">
+          <div id="popupEmptyState" class="empty-state hidden"></div>
+          <div id="popupResults" class="result-list"></div>
+        </section>
       </section>
 
-      <section class="popup-list-wrap">
-        <div id="popupEmptyState" class="empty-state hidden"></div>
-        <div id="popupResults" class="result-list"></div>
+      <section id="popupEditorView" class="popup-editor-view hidden">
+        <header class="popup-editor-topbar">
+          <button id="popupBackButton" class="icon-button" type="button"></button>
+          <button id="popupEditorSettingsButton" class="icon-button" type="button" aria-label="Settings"></button>
+        </header>
+
+        <div class="popup-editor-shell glass-card">
+          <div class="popup-editor-head">
+            <p id="popupEditorEyebrow" class="popup-editor-eyebrow"></p>
+            <h2 id="popupEditorTitle" class="popup-editor-title"></h2>
+          </div>
+
+          <form id="popupShortcutForm" class="popup-editor-form">
+            <div class="popup-field-group">
+              <label class="popup-field-label" for="popupShortcutName"></label>
+              <input id="popupShortcutName" class="popup-field-input" type="text" maxlength="80">
+              <div id="popupNameError" class="popup-error-text"></div>
+            </div>
+
+            <div class="popup-field-group">
+              <label class="popup-field-label" for="popupShortcutTrigger"></label>
+              <input id="popupShortcutTrigger" class="popup-field-input" type="text" maxlength="80" autocapitalize="off" autocomplete="off" spellcheck="false">
+              <div class="popup-field-help"></div>
+              <div id="popupTriggerError" class="popup-error-text"></div>
+            </div>
+
+            <div class="popup-field-group">
+              <label class="popup-field-label" for="popupShortcutFolder"></label>
+              <select id="popupShortcutFolder" class="popup-field-input popup-field-select"></select>
+            </div>
+
+            <div class="popup-field-group">
+              <label class="popup-field-label" for="popupShortcutContent"></label>
+              <textarea id="popupShortcutContent" class="popup-field-textarea"></textarea>
+              <div id="popupContentError" class="popup-error-text"></div>
+            </div>
+
+            <div class="popup-toggle-row">
+              <div>
+                <div class="popup-field-label" id="popupEnabledLabel"></div>
+                <div class="popup-field-help" id="popupEnabledHelp"></div>
+              </div>
+              <label class="switch">
+                <input id="popupShortcutEnabled" type="checkbox">
+                <span class="switch-track"></span>
+              </label>
+            </div>
+
+            <div class="popup-editor-actions">
+              <button id="popupDeleteButton" class="popup-danger-button" type="button"></button>
+              <div class="popup-editor-actions-right">
+                <button id="popupCancelButton" class="popup-secondary-button" type="button"></button>
+                <button id="popupSaveButton" class="popup-primary-button" type="submit"></button>
+              </div>
+            </div>
+          </form>
+        </div>
       </section>
     </main>
 

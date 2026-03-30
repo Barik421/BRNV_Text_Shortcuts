@@ -277,6 +277,7 @@ async function initSettings() {
       return;
     }
     await disableAllShortcutsAction();
+    await loadSettings();
   });
   document.getElementById("resetStatsButton").addEventListener("click", resetStatistics);
   document.getElementById("supportToggleButton").addEventListener("click", openSupportModal);
