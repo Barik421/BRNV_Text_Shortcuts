@@ -272,6 +272,16 @@ function closeFolderScreen() {
   dashboardState.currentFolderId = null;
 }
 
+async function renameFolder(folder) {
+  const nextName = await openFolderModal(folder);
+  if (!nextName) {
+    return;
+  }
+
+  await BRNVData.upsertFolder({ ...folder, name: nextName.trim() });
+  await refreshDashboard();
+}
+
 function openFolderScreen(folderId) {
   const root = document.getElementById("folderScreenRoot");
   const folder = dashboardState.folders.find((item) => item.id === folderId);
@@ -291,6 +301,7 @@ function openFolderScreen(folderId) {
             <p class="folder-screen-subtitle">${dashboardText("folderShortcuts")}</p>
           </div>
           <div class="folder-screen-actions">
+            <button id="folderScreenRenameButton" class="mini-button" type="button">${dashboardText("rename")}</button>
             <button id="folderScreenAddShortcutButton" class="mini-button" type="button">${dashboardText("addShortcut")}</button>
             <button id="folderScreenCloseButton" class="ghost-button" type="button">${dashboardText("close")}</button>
           </div>
@@ -306,6 +317,13 @@ function openFolderScreen(folderId) {
 
   renderShortcuts();
 
+  root.querySelector("#folderScreenRenameButton").addEventListener("click", async () => {
+    const latestFolder = dashboardState.folders.find((item) => item.id === folderId);
+    if (!latestFolder) {
+      return;
+    }
+    await renameFolder(latestFolder);
+  });
   root.querySelector("#folderScreenCloseButton").addEventListener("click", closeFolderScreen);
   root.querySelector(".folder-screen-backdrop").addEventListener("click", closeFolderScreen);
   root.querySelector("#folderScreenAddShortcutButton").addEventListener("click", () => openShortcutEditor());
