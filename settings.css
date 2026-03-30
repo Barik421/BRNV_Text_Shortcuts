@@ -374,10 +374,11 @@ html[data-theme="dark"] .secondary-button {
 
 .copy-toast {
   position: absolute;
-  left: 50%;
-  bottom: 92px;
-  transform: translateX(-50%);
+  left: 24px;
+  bottom: 24px;
+  right: auto;
   min-height: 38px;
+  max-width: calc(100% - 170px);
   display: flex;
   align-items: center;
   justify-content: center;
