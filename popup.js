@@ -11,6 +11,10 @@ function popupText(key) {
   return BRNVI18n.t(popupState.language, key);
 }
 
+function applyPopupTheme(isDark) {
+  document.documentElement.dataset.theme = isDark ? "dark" : "light";
+}
+
 function popupPreview(text) {
   return text.replace(/\s+/g, " ").trim().slice(0, 92) || "…";
 }
@@ -160,6 +164,7 @@ async function initPopup() {
   popupState.folders = syncData.folders;
   popupState.settings = syncData.settings;
   popupState.language = syncData.settings.language;
+  applyPopupTheme(!!syncData.settings.darkTheme);
 
   document.documentElement.lang = popupState.language;
   document.getElementById("openDashboardButton").textContent = popupText("openDashboard");

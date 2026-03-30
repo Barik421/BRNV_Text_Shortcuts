@@ -7,6 +7,10 @@ function settingsText(key) {
   return BRNVI18n.t(settingsState.language, key);
 }
 
+function applySettingsTheme(isDark) {
+  document.documentElement.dataset.theme = isDark ? "dark" : "light";
+}
+
 function closeSettingsModal() {
   const root = document.getElementById("settingsModalRoot");
   root.classList.add("hidden");
@@ -134,10 +138,12 @@ async function loadSettings() {
 
   renderSettingsTexts();
   document.getElementById("languageSelect").value = settingsState.settings.language;
+  document.getElementById("darkThemeToggle").checked = !!settingsState.settings.darkTheme;
   document.getElementById("caseSensitiveToggle").checked = settingsState.settings.caseSensitive;
   document.getElementById("expansionToggle").checked = settingsState.settings.expansionEnabled;
   document.getElementById("syncInfoText").textContent = settingsText("syncInfoCopy");
   document.getElementById("disableAllToggle").checked = syncData.shortcuts.length > 0 && syncData.shortcuts.every((shortcut) => !shortcut.enabled);
+  applySettingsTheme(!!settingsState.settings.darkTheme);
 }
 
 async function updateSetting(key, value) {
@@ -163,6 +169,10 @@ async function updateSetting(key, value) {
     settingsState.language = value;
     renderSettingsTexts();
     document.getElementById("syncInfoText").textContent = settingsText("syncInfoCopy");
+  }
+
+  if (key === "darkTheme") {
+    applySettingsTheme(!!value);
   }
 }
 
@@ -250,6 +260,10 @@ async function initSettings() {
 
   document.getElementById("languageSelect").addEventListener("change", (event) => {
     updateSetting("language", event.target.value);
+  });
+
+  document.getElementById("darkThemeToggle").addEventListener("change", (event) => {
+    updateSetting("darkTheme", event.target.checked);
   });
 
   document.getElementById("caseSensitiveToggle").addEventListener("change", (event) => {

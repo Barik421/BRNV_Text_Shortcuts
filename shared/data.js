@@ -14,6 +14,7 @@ const BRNVData = (() => {
     shortcuts: [],
     settings: {
       language: "en",
+      darkTheme: false,
       caseSensitive: true,
       expansionEnabled: true
     }

@@ -15,6 +15,19 @@
   --transition: 180ms ease;
 }
 
+html[data-theme="dark"] {
+  --bg: #141820;
+  --surface: rgba(30, 35, 44, 0.9);
+  --surface-strong: #1c212a;
+  --surface-muted: #252b35;
+  --text: #f2f5f8;
+  --text-soft: #a8b1bd;
+  --line: rgba(255, 255, 255, 0.08);
+  --accent: #f04b4f;
+  --accent-strong: #d23237;
+  --shadow: 0 18px 40px rgba(0, 0, 0, 0.3);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -26,7 +39,7 @@ body {
   min-height: 480px;
   background:
     radial-gradient(circle at top right, rgba(217, 48, 54, 0.12), transparent 34%),
-    linear-gradient(180deg, #fafafc 0%, #f2f2f5 100%);
+    linear-gradient(180deg, color-mix(in srgb, var(--bg) 72%, #ffffff 28%) 0%, var(--bg) 100%);
   color: var(--text);
   font-family: "SF Pro Display", "Segoe UI", sans-serif;
 }

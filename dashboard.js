@@ -12,6 +12,10 @@ function dashboardText(key) {
   return BRNVI18n.t(dashboardState.language, key);
 }
 
+function applyDashboardTheme(isDark) {
+  document.documentElement.dataset.theme = isDark ? "dark" : "light";
+}
+
 function renderStaticTexts() {
   document.documentElement.lang = dashboardState.language;
   document.querySelectorAll("[data-i18n]").forEach((node) => {
@@ -783,6 +787,7 @@ async function refreshDashboard() {
   dashboardState.settings = syncData.settings;
   dashboardState.language = syncData.settings.language;
   dashboardState.stats = await BRNVData.getLocalStats();
+  applyDashboardTheme(!!syncData.settings.darkTheme);
 
   renderStaticTexts();
   renderSummary();

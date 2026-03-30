@@ -18,6 +18,21 @@
   --transition: 180ms ease;
 }
 
+html[data-theme="dark"] {
+  --bg: #13171d;
+  --panel: rgba(31, 36, 44, 0.84);
+  --panel-strong: #1e242d;
+  --panel-muted: #262d37;
+  --text: #f2f5f8;
+  --text-soft: #aab3bf;
+  --line: rgba(255, 255, 255, 0.08);
+  --accent: #f04b4f;
+  --accent-soft: rgba(240, 75, 79, 0.14);
+  --danger: #ff7b80;
+  --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 14px 32px rgba(0, 0, 0, 0.24);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -28,7 +43,7 @@ body {
   margin: 0;
   font-family: "SF Pro Display", "Segoe UI", sans-serif;
   color: var(--text);
-  background: linear-gradient(180deg, #fbfbfc 0%, #f2f3f6 100%);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 76%, #ffffff 24%) 0%, var(--bg) 100%);
 }
 
 body {
