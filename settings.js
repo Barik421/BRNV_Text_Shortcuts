@@ -249,9 +249,11 @@ async function initSettings() {
       const root = document.getElementById("settingsModalRoot");
       if (!root.classList.contains("hidden")) {
         closeSettingsModal();
+        event.preventDefault();
+        event.stopPropagation();
       }
     }
-  });
+  }, true);
 }
 
 document.addEventListener("DOMContentLoaded", initSettings);

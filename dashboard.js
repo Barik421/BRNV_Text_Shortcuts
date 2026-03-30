@@ -270,6 +270,25 @@ function isRootOpen(rootId) {
   return root && !root.classList.contains("hidden");
 }
 
+function closeTopDashboardLayer() {
+  if (isRootOpen("modalRoot")) {
+    closeModal(document.getElementById("modalRoot"));
+    return true;
+  }
+
+  if (isRootOpen("statsRoot")) {
+    closeModal(document.getElementById("statsRoot"));
+    return true;
+  }
+
+  if (dashboardState.currentFolderId) {
+    closeFolderScreen();
+    return true;
+  }
+
+  return false;
+}
+
 function closeFolderScreen() {
   const root = document.getElementById("folderScreenRoot");
   root.classList.add("hidden");
@@ -755,20 +774,12 @@ async function initDashboard() {
       return;
     }
 
-    if (isRootOpen("modalRoot")) {
-      closeModal(document.getElementById("modalRoot"));
-      return;
+    const handled = closeTopDashboardLayer();
+    if (handled) {
+      event.preventDefault();
+      event.stopPropagation();
     }
-
-    if (isRootOpen("statsRoot")) {
-      closeModal(document.getElementById("statsRoot"));
-      return;
-    }
-
-    if (dashboardState.currentFolderId) {
-      closeFolderScreen();
-    }
-  });
+  }, true);
 
   const params = new URLSearchParams(window.location.search);
   const shortcutId = params.get("shortcut");
