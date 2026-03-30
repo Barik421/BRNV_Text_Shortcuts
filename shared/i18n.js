@@ -93,6 +93,7 @@ const BRNVI18n = (() => {
       totalUsage: "Total usage",
       triggerCode: "Trigger Code",
       triggerHelp: "Trigger codes must stay unique and cannot be prefixes of each other.",
+      usageTrend: "Usage trend",
       year: "Year"
     },
     uk: {
@@ -188,6 +189,7 @@ const BRNVI18n = (() => {
       totalUsage: "Усього використань",
       triggerCode: "Тригер",
       triggerHelp: "Тригери мають бути унікальними й не можуть бути префіксами один одного.",
+      usageTrend: "Динаміка використання",
       year: "Рік"
     }
   };

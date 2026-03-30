@@ -53,6 +53,71 @@ function createSummaryCard(label, value) {
   return card;
 }
 
+function getChartSeries(periodKey) {
+  const stats = dashboardState.stats || {};
+  const now = new Date();
+  const series = [];
+
+  if (periodKey === "day") {
+    for (let index = 6; index >= 0; index -= 1) {
+      const date = new Date(now);
+      date.setDate(now.getDate() - index);
+      const key = date.toISOString().slice(0, 10);
+      series.push({
+        label: key.slice(5),
+        value: stats.daily?.[key] || 0
+      });
+    }
+    return series;
+  }
+
+  if (periodKey === "month") {
+    for (let index = 5; index >= 0; index -= 1) {
+      const date = new Date(now.getFullYear(), now.getMonth() - index, 1);
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      series.push({
+        label: key.slice(5),
+        value: stats.monthly?.[key] || 0
+      });
+    }
+    return series;
+  }
+
+  for (let index = 4; index >= 0; index -= 1) {
+    const year = String(now.getFullYear() - index);
+    series.push({
+      label: year,
+      value: stats.yearly?.[year] || 0
+    });
+  }
+
+  return series;
+}
+
+function renderStatsChart(periodKey) {
+  const series = getChartSeries(periodKey);
+  const maxValue = Math.max(...series.map((item) => item.value), 1);
+
+  return `
+    <section class="stats-chart">
+      <div class="stats-chart-head">
+        <p class="summary-label">${dashboardText("usageTrend")}</p>
+      </div>
+      <div class="stats-chart-bars">
+        ${series.map((item) => `
+          <div class="stats-bar-wrap">
+            <div class="stats-bar-value">${item.value}</div>
+            <div class="stats-bar-track">
+              <div class="stats-bar-fill" style="height:${Math.max((item.value / maxValue) * 100, item.value > 0 ? 12 : 6)}%"></div>
+            </div>
+            <div class="stats-bar-label">${item.label}</div>
+          </div>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
+
 function renderSummary() {
   const node = document.getElementById("dashboardSummary");
   const folderCount = dashboardState.folders.length;
@@ -572,6 +637,7 @@ function renderStatsModal(period = "day") {
           <h3>${usageForPeriod}</h3>
         </article>
       </div>
+      ${renderStatsChart(periodKey)}
       <div class="modal-actions modal-actions-end stats-actions">
         <button id="resetStatsInlineButton" class="danger-button" type="button">${dashboardText("resetStatisticsInline")}</button>
       </div>
