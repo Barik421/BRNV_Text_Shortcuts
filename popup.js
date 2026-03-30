@@ -13,51 +13,6 @@ function popupPreview(text) {
   return text.replace(/\s+/g, " ").trim().slice(0, 92) || "…";
 }
 
-function closePopupModal() {
-  const root = document.getElementById("popupModalRoot");
-  root.classList.add("hidden");
-  root.innerHTML = "";
-}
-
-function openPopupShortcutPreview(shortcut) {
-  const root = document.getElementById("popupModalRoot");
-  const folder = popupState.folders.find((item) => item.id === shortcut.folderId);
-  root.innerHTML = `
-    <div class="popup-modal-panel">
-      <div class="popup-modal-header">
-        <div>
-          <div class="result-head">
-            <h2 class="popup-modal-title">${BRNVData.escapeHtml(shortcut.name)}</h2>
-            <span class="trigger-pill">${BRNVData.escapeHtml(shortcut.trigger)}</span>
-          </div>
-          ${folder ? `<p class="popup-modal-meta folder-pill">${BRNVData.escapeHtml(folder.name)}</p>` : ""}
-        </div>
-        <button id="popupCloseButton" class="popup-close-button" type="button">×</button>
-      </div>
-      <p class="popup-modal-copy">${BRNVData.escapeHtml(shortcut.content)}</p>
-      <div class="popup-modal-actions">
-        <button id="popupDismissButton" class="popup-secondary-button" type="button">${popupText("close")}</button>
-        <button id="popupOpenDashboardButton" class="popup-primary-button" type="button">${popupText("openDashboard")}</button>
-      </div>
-    </div>
-  `;
-  root.classList.remove("hidden");
-
-  const close = () => closePopupModal();
-  root.querySelector("#popupCloseButton").addEventListener("click", close);
-  root.querySelector("#popupDismissButton").addEventListener("click", close);
-  root.querySelector("#popupOpenDashboardButton").addEventListener("click", () => {
-    const url = chrome.runtime.getURL(`dashboard.html?shortcut=${encodeURIComponent(shortcut.id)}`);
-    chrome.tabs.create({ url });
-    window.close();
-  });
-  root.addEventListener("click", (event) => {
-    if (event.target === root) {
-      close();
-    }
-  }, { once: true });
-}
-
 function popupFilterShortcuts(query) {
   const normalized = query.trim().toLowerCase();
 
@@ -114,7 +69,11 @@ function renderPopupResults() {
       card.querySelector(".folder-pill").textContent = folder.name;
     }
 
-    card.addEventListener("click", () => openPopupShortcutPreview(shortcut));
+    card.addEventListener("click", () => {
+      const url = chrome.runtime.getURL(`dashboard.html?shortcut=${encodeURIComponent(shortcut.id)}`);
+      chrome.tabs.create({ url });
+      window.close();
+    });
 
     resultsNode.appendChild(card);
   });
@@ -145,15 +104,6 @@ async function initPopup() {
   });
 
   document.getElementById("popupSearch").addEventListener("input", renderPopupResults);
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
-      const root = document.getElementById("popupModalRoot");
-      if (!root.classList.contains("hidden")) {
-        closePopupModal();
-        event.preventDefault();
-      }
-    }
-  }, true);
 
   renderPopupResults();
 }

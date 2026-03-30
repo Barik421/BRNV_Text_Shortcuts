@@ -284,28 +284,36 @@ function renderDashboardSearchResults() {
   }
 
   matches.forEach((shortcut) => {
-    const card = document.createElement("article");
-    card.className = `shortcut-card ${shortcut.enabled ? "" : "disabled"}`;
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "search-result-item";
     card.innerHTML = `
       <div class="shortcut-head">
-        <h3></h3>
+        <h3 class="search-result-title"></h3>
         <span class="badge trigger"></span>
       </div>
-      <p class="shortcut-preview"></p>
+      <p class="search-result-copy"></p>
       <div class="inline-row">
         <span class="badge status"></span>
         <span class="shortcut-meta"></span>
       </div>
     `;
 
-    card.querySelector("h3").textContent = shortcut.name;
+    card.querySelector(".search-result-title").textContent = shortcut.name;
     card.querySelector(".badge.trigger").textContent = shortcut.trigger;
-    card.querySelector(".shortcut-preview").textContent = shortcut.content.replace(/\s+/g, " ").trim().slice(0, 120);
+    card.querySelector(".search-result-copy").textContent = shortcut.content.replace(/\s+/g, " ").trim().slice(0, 120);
     card.querySelector(".badge.status").textContent = shortcut.enabled ? dashboardText("enabled") : dashboardText("disabled");
 
     const folder = dashboardState.folders.find((item) => item.id === shortcut.folderId);
     card.querySelector(".shortcut-meta").textContent = folder ? folder.name : dashboardText("generalFolder");
-    card.addEventListener("click", () => openShortcutEditor(shortcut.id));
+    card.addEventListener("click", () => {
+      dashboardState.search = "";
+      document.getElementById("dashboardSearch").value = "";
+      renderDashboardSearchResults();
+      dashboardState.currentFolderId = shortcut.folderId;
+      openFolderScreen(shortcut.folderId);
+      openShortcutEditor(shortcut.id);
+    });
     node.appendChild(card);
   });
 }

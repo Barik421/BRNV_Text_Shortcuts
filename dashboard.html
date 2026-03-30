@@ -23,6 +23,9 @@
         <div class="hero-search-wrap">
           <label class="sr-only" for="dashboardSearch"></label>
           <input id="dashboardSearch" class="hero-search" type="search" autocomplete="off">
+          <div id="dashboardSearchResultsSection" class="search-results-dropdown hidden">
+            <div id="dashboardSearchResultsList" class="search-results-list"></div>
+          </div>
         </div>
         <div class="hero-cta">
           <button id="addShortcutButton" class="add-button" type="button"></button>
@@ -37,13 +40,6 @@
           <button id="addFolderButton" class="mini-button" type="button"></button>
         </div>
         <div id="foldersGrid" class="folder-grid"></div>
-      </section>
-
-      <section id="dashboardSearchResultsSection" class="hidden">
-        <div class="section-head">
-          <h2 data-i18n="searchResults"></h2>
-        </div>
-        <div id="dashboardSearchResultsList" class="shortcut-list"></div>
       </section>
     </main>
 
