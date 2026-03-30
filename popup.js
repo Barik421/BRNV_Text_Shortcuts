@@ -188,48 +188,56 @@ async function initPopup() {
   document.getElementById("popupCancelButton").addEventListener("click", showPopupListView);
   document.querySelector(".popup-editor-backdrop").addEventListener("click", showPopupListView);
   document.getElementById("popupDeleteButton").addEventListener("click", async () => {
-    const shortcut = getPopupSelectedShortcut();
-    if (!shortcut) {
-      return;
+    try {
+      const shortcut = getPopupSelectedShortcut();
+      if (!shortcut) {
+        return;
+      }
+      await BRNVData.deleteShortcut(shortcut.id);
+      const syncData = await BRNVData.getSyncData();
+      popupState.shortcuts = syncData.shortcuts;
+      popupState.folders = syncData.folders;
+      renderPopupResults();
+      showPopupListView();
+    } catch (error) {
+      console.error("Failed to delete shortcut from popup", error);
     }
-    await BRNVData.deleteShortcut(shortcut.id);
-    const syncData = await BRNVData.getSyncData();
-    popupState.shortcuts = syncData.shortcuts;
-    popupState.folders = syncData.folders;
-    renderPopupResults();
-    showPopupListView();
   });
   document.getElementById("popupShortcutForm").addEventListener("submit", async (event) => {
     event.preventDefault();
-    const shortcut = getPopupSelectedShortcut();
-    const isCreateMode = popupState.editorMode === "create";
-    if (!shortcut && !isCreateMode) {
-      return;
-    }
+    try {
+      const shortcut = getPopupSelectedShortcut();
+      const isCreateMode = popupState.editorMode === "create";
+      if (!shortcut && !isCreateMode) {
+        return;
+      }
 
-    const values = {
-      id: shortcut?.id,
-      name: document.getElementById("popupShortcutName").value,
-      trigger: document.getElementById("popupShortcutTrigger").value,
-      folderId: shortcut?.folderId || BRNVData.DEFAULT_FOLDER_ID,
-      content: document.getElementById("popupShortcutContent").value,
-      enabled: document.getElementById("popupShortcutEnabled").checked
-    };
+      const values = {
+        id: shortcut?.id,
+        name: document.getElementById("popupShortcutName").value,
+        trigger: document.getElementById("popupShortcutTrigger").value,
+        folderId: shortcut?.folderId || BRNVData.DEFAULT_FOLDER_ID,
+        content: document.getElementById("popupShortcutContent").value,
+        enabled: document.getElementById("popupShortcutEnabled").checked
+      };
 
-    if (!validatePopupShortcutForm(values)) {
-      return;
-    }
+      if (!validatePopupShortcutForm(values)) {
+        return;
+      }
 
-    const savedShortcut = await BRNVData.upsertShortcut(values, popupState.settings.caseSensitive);
-    const syncData = await BRNVData.getSyncData();
-    popupState.shortcuts = syncData.shortcuts;
-    popupState.folders = syncData.folders;
-    renderPopupResults();
-    if (isCreateMode) {
-      showPopupEditorView(savedShortcut?.id || null, "edit");
-      return;
+      const savedShortcut = await BRNVData.upsertShortcut(values, popupState.settings.caseSensitive);
+      const syncData = await BRNVData.getSyncData();
+      popupState.shortcuts = syncData.shortcuts;
+      popupState.folders = syncData.folders;
+      renderPopupResults();
+      if (isCreateMode) {
+        showPopupEditorView(savedShortcut?.id || null, "edit");
+        return;
+      }
+      showPopupEditorView(values.id, "edit");
+    } catch (error) {
+      console.error("Failed to save shortcut from popup", error);
     }
-    showPopupEditorView(values.id, "edit");
   });
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && !document.getElementById("popupEditorOverlay").classList.contains("hidden")) {
