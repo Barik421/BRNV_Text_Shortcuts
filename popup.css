@@ -151,7 +151,7 @@ textarea {
   display: grid;
   place-items: center;
   padding: 10px;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 .popup-editor-backdrop {
@@ -178,7 +178,6 @@ textarea {
   max-height: calc(100vh - 20px);
   display: flex;
   flex-direction: column;
-  pointer-events: auto;
 }
 
 .popup-editor-shell {
