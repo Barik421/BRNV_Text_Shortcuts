@@ -7,6 +7,78 @@ function settingsText(key) {
   return BRNVI18n.t(settingsState.language, key);
 }
 
+function closeSettingsModal() {
+  const root = document.getElementById("settingsModalRoot");
+  root.classList.add("hidden");
+  root.innerHTML = "";
+}
+
+function openSettingsInfoModal({ title, message, actionLabel }) {
+  return new Promise((resolve) => {
+    const root = document.getElementById("settingsModalRoot");
+    root.innerHTML = `
+      <div class="modal-panel">
+        <div class="modal-header">
+          <h2 class="modal-title">${title}</h2>
+          <button id="closeSettingsInfoButton" class="close-button" type="button">×</button>
+        </div>
+        <p class="modal-copy">${message}</p>
+        <div class="modal-actions">
+          <button id="confirmSettingsInfoButton" class="primary-button" type="button">${actionLabel || settingsText("ok")}</button>
+        </div>
+      </div>
+    `;
+    root.classList.remove("hidden");
+
+    const finish = () => {
+      closeSettingsModal();
+      resolve();
+    };
+
+    root.querySelector("#closeSettingsInfoButton").addEventListener("click", finish);
+    root.querySelector("#confirmSettingsInfoButton").addEventListener("click", finish);
+    root.addEventListener("click", (event) => {
+      if (event.target === root) {
+        finish();
+      }
+    }, { once: true });
+  });
+}
+
+function openSettingsConfirmModal({ title, message, confirmLabel }) {
+  return new Promise((resolve) => {
+    const root = document.getElementById("settingsModalRoot");
+    root.innerHTML = `
+      <div class="modal-panel">
+        <div class="modal-header">
+          <h2 class="modal-title">${title}</h2>
+          <button id="closeSettingsConfirmButton" class="close-button" type="button">×</button>
+        </div>
+        <p class="modal-copy">${message}</p>
+        <div class="modal-actions">
+          <button id="cancelSettingsConfirmButton" class="secondary-button" type="button">${settingsText("cancel")}</button>
+          <button id="approveSettingsConfirmButton" class="danger-button" type="button">${confirmLabel || settingsText("yes")}</button>
+        </div>
+      </div>
+    `;
+    root.classList.remove("hidden");
+
+    const finish = (value) => {
+      closeSettingsModal();
+      resolve(value);
+    };
+
+    root.querySelector("#closeSettingsConfirmButton").addEventListener("click", () => finish(false));
+    root.querySelector("#cancelSettingsConfirmButton").addEventListener("click", () => finish(false));
+    root.querySelector("#approveSettingsConfirmButton").addEventListener("click", () => finish(true));
+    root.addEventListener("click", (event) => {
+      if (event.target === root) {
+        finish(false);
+      }
+    }, { once: true });
+  });
+}
+
 function renderSettingsTexts() {
   document.documentElement.lang = settingsState.language;
   document.querySelectorAll("[data-i18n]").forEach((node) => {
@@ -39,7 +111,10 @@ async function updateSetting(key, value) {
     const validation = BRNVData.validateShortcutCollection(syncData.shortcuts, value);
 
     if (!validation.ok) {
-      window.alert(settingsText(validation.errorKey));
+      await openSettingsInfoModal({
+        title: settingsText("settings"),
+        message: settingsText(validation.errorKey)
+      });
       document.getElementById("caseSensitiveToggle").checked = settingsState.settings.caseSensitive;
       return;
     }
@@ -74,27 +149,43 @@ async function importData(file) {
   try {
     payload = JSON.parse(text);
   } catch (_error) {
-    window.alert(settingsText("importInvalidJson"));
+    await openSettingsInfoModal({
+      title: settingsText("importShortcuts"),
+      message: settingsText("importInvalidJson")
+    });
     return;
   }
 
   try {
     await BRNVData.importData(payload);
     await loadSettings();
-    window.alert(settingsText("importSuccess"));
+    await openSettingsInfoModal({
+      title: settingsText("importShortcuts"),
+      message: settingsText("importSuccess")
+    });
   } catch (error) {
-    window.alert(error.message || settingsText("importValidationFailed"));
+    await openSettingsInfoModal({
+      title: settingsText("importShortcuts"),
+      message: error.message || settingsText("importValidationFailed")
+    });
   }
 }
 
 async function resetStatistics() {
-  const confirmed = window.confirm(settingsText("resetStatisticsConfirm"));
+  const confirmed = await openSettingsConfirmModal({
+    title: settingsText("resetStatistics"),
+    message: settingsText("resetStatisticsConfirm"),
+    confirmLabel: settingsText("yes")
+  });
   if (!confirmed) {
     return;
   }
 
   await BRNVData.resetStats();
-  window.alert(settingsText("resetStatisticsDone"));
+  await openSettingsInfoModal({
+    title: settingsText("resetStatistics"),
+    message: settingsText("resetStatisticsDone")
+  });
 }
 
 async function initSettings() {
@@ -133,6 +224,14 @@ async function initSettings() {
   });
   document.getElementById("copyWalletButton").addEventListener("click", async () => {
     await navigator.clipboard.writeText("TKQF5fJQ6VLZJka7xZyYKCUScWWJphm6tW");
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      const root = document.getElementById("settingsModalRoot");
+      if (!root.classList.contains("hidden")) {
+        closeSettingsModal();
+      }
+    }
   });
 }
 

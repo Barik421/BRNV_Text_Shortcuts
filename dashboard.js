@@ -265,6 +265,11 @@ function closeModal(root) {
   root.innerHTML = "";
 }
 
+function isRootOpen(rootId) {
+  const root = document.getElementById(rootId);
+  return root && !root.classList.contains("hidden");
+}
+
 function closeFolderScreen() {
   const root = document.getElementById("folderScreenRoot");
   root.classList.add("hidden");
@@ -736,7 +741,21 @@ async function initDashboard() {
   });
   document.getElementById("statisticsButton").addEventListener("click", () => renderStatsModal());
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && dashboardState.currentFolderId) {
+    if (event.key !== "Escape") {
+      return;
+    }
+
+    if (isRootOpen("modalRoot")) {
+      closeModal(document.getElementById("modalRoot"));
+      return;
+    }
+
+    if (isRootOpen("statsRoot")) {
+      closeModal(document.getElementById("statsRoot"));
+      return;
+    }
+
+    if (dashboardState.currentFolderId) {
       closeFolderScreen();
     }
   });
