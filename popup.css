@@ -452,6 +452,7 @@ textarea {
 .result-card {
   border: 1px solid rgba(36, 38, 44, 0.06);
   background: rgba(255, 255, 255, 0.88);
+  color: var(--text);
   border-radius: 20px;
   padding: 14px;
   cursor: pointer;
@@ -482,6 +483,7 @@ textarea {
 .result-name {
   font-size: 14px;
   font-weight: 700;
+  color: var(--text);
 }
 
 .trigger-pill,
