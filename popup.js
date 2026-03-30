@@ -3,7 +3,8 @@ const popupState = {
   folders: [],
   settings: null,
   language: "en",
-  selectedShortcutId: null
+  selectedShortcutId: null,
+  editorMode: "edit"
 };
 
 function popupText(key) {
@@ -20,20 +21,21 @@ function getPopupSelectedShortcut() {
 
 function showPopupListView() {
   popupState.selectedShortcutId = null;
-  document.getElementById("popupListView").classList.remove("hidden");
-  document.getElementById("popupEditorView").classList.add("hidden");
+  popupState.editorMode = "edit";
+  document.getElementById("popupEditorOverlay").classList.add("hidden");
 }
 
-function showPopupEditorView(shortcutId) {
+function showPopupEditorView(shortcutId = null, mode = "edit") {
   popupState.selectedShortcutId = shortcutId;
-  document.getElementById("popupListView").classList.add("hidden");
-  document.getElementById("popupEditorView").classList.remove("hidden");
+  popupState.editorMode = mode;
+  document.getElementById("popupEditorOverlay").classList.remove("hidden");
   renderPopupEditor();
 }
 
 function renderPopupEditor() {
   const shortcut = getPopupSelectedShortcut();
-  if (!shortcut) {
+  const isCreateMode = popupState.editorMode === "create";
+  if (!shortcut && !isCreateMode) {
     showPopupListView();
     return;
   }
@@ -41,11 +43,10 @@ function renderPopupEditor() {
   document.getElementById("popupBackButton").textContent = popupText("back");
   document.getElementById("popupEditorSettingsButton").textContent = popupText("settings");
   document.getElementById("popupEditorEyebrow").textContent = popupText("editorEyebrow");
-  document.getElementById("popupEditorTitle").textContent = shortcut.name;
+  document.getElementById("popupEditorTitle").textContent = isCreateMode ? popupText("createShortcut") : shortcut.name;
 
   document.querySelector('label[for="popupShortcutName"]').textContent = popupText("name");
   document.querySelector('label[for="popupShortcutTrigger"]').textContent = popupText("triggerCode");
-  document.querySelector('label[for="popupShortcutFolder"]').textContent = popupText("folder");
   document.querySelector('label[for="popupShortcutContent"]').textContent = popupText("textContent");
   document.querySelector(".popup-field-help").textContent = popupText("triggerHelp");
   document.getElementById("popupEnabledLabel").textContent = popupText("enabled");
@@ -54,23 +55,14 @@ function renderPopupEditor() {
   document.getElementById("popupCancelButton").textContent = popupText("cancel");
   document.getElementById("popupSaveButton").textContent = popupText("save");
 
-  document.getElementById("popupShortcutName").value = shortcut.name;
-  document.getElementById("popupShortcutTrigger").value = shortcut.trigger;
-  document.getElementById("popupShortcutContent").value = shortcut.content;
-  document.getElementById("popupShortcutEnabled").checked = shortcut.enabled;
+  document.getElementById("popupShortcutName").value = isCreateMode ? "" : shortcut.name;
+  document.getElementById("popupShortcutTrigger").value = isCreateMode ? "" : shortcut.trigger;
+  document.getElementById("popupShortcutContent").value = isCreateMode ? "" : shortcut.content;
+  document.getElementById("popupShortcutEnabled").checked = isCreateMode ? true : shortcut.enabled;
   document.getElementById("popupNameError").textContent = "";
   document.getElementById("popupTriggerError").textContent = "";
   document.getElementById("popupContentError").textContent = "";
-
-  const folderSelect = document.getElementById("popupShortcutFolder");
-  folderSelect.innerHTML = "";
-  popupState.folders.forEach((folder) => {
-    const option = document.createElement("option");
-    option.value = folder.id;
-    option.textContent = folder.name;
-    option.selected = folder.id === shortcut.folderId;
-    folderSelect.appendChild(option);
-  });
+  document.getElementById("popupDeleteButton").classList.toggle("hidden", isCreateMode);
 }
 
 function validatePopupShortcutForm(values) {
@@ -172,6 +164,7 @@ async function initPopup() {
   document.documentElement.lang = popupState.language;
   document.getElementById("openDashboardButton").textContent = popupText("openDashboard");
   document.getElementById("openSettingsButton").textContent = popupText("settings");
+  document.getElementById("popupAddShortcutButton").textContent = popupText("addShortcut");
   document.getElementById("popupSearch").placeholder = popupText("searchPlaceholder");
   document.querySelector('label[for="popupSearch"]').textContent = popupText("searchPlaceholder");
 
@@ -186,12 +179,14 @@ async function initPopup() {
   });
 
   document.getElementById("popupSearch").addEventListener("input", renderPopupResults);
+  document.getElementById("popupAddShortcutButton").addEventListener("click", () => showPopupEditorView(null, "create"));
   document.getElementById("popupBackButton").addEventListener("click", showPopupListView);
   document.getElementById("popupEditorSettingsButton").addEventListener("click", () => {
     chrome.tabs.create({ url: chrome.runtime.getURL("settings.html") });
     window.close();
   });
   document.getElementById("popupCancelButton").addEventListener("click", showPopupListView);
+  document.querySelector(".popup-editor-backdrop").addEventListener("click", showPopupListView);
   document.getElementById("popupDeleteButton").addEventListener("click", async () => {
     const shortcut = getPopupSelectedShortcut();
     if (!shortcut) {
@@ -212,10 +207,10 @@ async function initPopup() {
     }
 
     const values = {
-      id: shortcut.id,
+      id: shortcut?.id,
       name: document.getElementById("popupShortcutName").value,
       trigger: document.getElementById("popupShortcutTrigger").value,
-      folderId: document.getElementById("popupShortcutFolder").value,
+      folderId: shortcut?.folderId || BRNVData.DEFAULT_FOLDER_ID,
       content: document.getElementById("popupShortcutContent").value,
       enabled: document.getElementById("popupShortcutEnabled").checked
     };
@@ -224,15 +219,19 @@ async function initPopup() {
       return;
     }
 
-    await BRNVData.upsertShortcut(values, popupState.settings.caseSensitive);
+    const savedShortcut = await BRNVData.upsertShortcut(values, popupState.settings.caseSensitive);
     const syncData = await BRNVData.getSyncData();
     popupState.shortcuts = syncData.shortcuts;
     popupState.folders = syncData.folders;
     renderPopupResults();
-    showPopupEditorView(values.id);
+    if (popupState.editorMode === "create") {
+      showPopupEditorView(savedShortcut?.id || null, "edit");
+      return;
+    }
+    showPopupEditorView(values.id, "edit");
   });
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !document.getElementById("popupEditorView").classList.contains("hidden")) {
+    if (event.key === "Escape" && !document.getElementById("popupEditorOverlay").classList.contains("hidden")) {
       showPopupListView();
       event.preventDefault();
       event.stopPropagation();

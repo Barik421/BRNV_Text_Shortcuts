@@ -115,10 +115,37 @@ textarea {
   min-height: 360px;
 }
 
-.popup-editor-view.hidden,
 .hidden,
 .sr-only {
   display: none;
+}
+
+.popup-add-button {
+  width: 100%;
+  min-height: 52px;
+  border: 0;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #e03d43 0%, #ca2b31 100%);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 18px 28px rgba(217, 48, 54, 0.22);
+}
+
+.popup-editor-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  padding: 14px;
+}
+
+.popup-editor-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 22, 26, 0.28);
+  backdrop-filter: blur(10px);
 }
 
 .popup-editor-topbar {
@@ -127,8 +154,15 @@ textarea {
   gap: 10px;
 }
 
+.popup-editor-view {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
 .popup-editor-shell {
   padding: 16px;
+  animation: pop-in 180ms ease both;
 }
 
 .popup-editor-head {
@@ -192,10 +226,6 @@ textarea {
 .popup-field-input {
   min-height: 46px;
   padding: 0 14px;
-}
-
-.popup-field-select {
-  appearance: none;
 }
 
 .popup-field-textarea {

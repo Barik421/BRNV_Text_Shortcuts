@@ -277,7 +277,8 @@ async function initSettings() {
       return;
     }
     await disableAllShortcutsAction();
-    await loadSettings();
+    const syncData = await BRNVData.getSyncData();
+    event.target.checked = syncData.shortcuts.length > 0 && syncData.shortcuts.every((shortcut) => !shortcut.enabled);
   });
   document.getElementById("resetStatsButton").addEventListener("click", resetStatistics);
   document.getElementById("supportToggleButton").addEventListener("click", openSupportModal);
