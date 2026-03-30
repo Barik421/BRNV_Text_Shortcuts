@@ -23,7 +23,7 @@ html,
 body {
   margin: 0;
   min-width: 360px;
-  min-height: 520px;
+  min-height: 480px;
   background:
     radial-gradient(circle at top right, rgba(217, 48, 54, 0.12), transparent 34%),
     linear-gradient(180deg, #fafafc 0%, #f2f2f5 100%);
@@ -39,31 +39,31 @@ textarea {
 }
 
 .popup-shell {
-  padding: 16px;
+  padding: 12px;
   position: relative;
   z-index: 1;
-  min-height: 520px;
+  min-height: 480px;
 }
 
 .popup-shell > section {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
 }
 
 .popup-topbar {
   display: flex;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
 }
 
 .icon-button {
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.82);
   color: var(--text);
-  border-radius: 16px;
-  min-height: 44px;
-  padding: 0 16px;
+  border-radius: 15px;
+  min-height: 38px;
+  padding: 0 14px;
   box-shadow: var(--shadow);
   cursor: pointer;
   transition: transform var(--transition), background var(--transition), box-shadow var(--transition);
@@ -92,16 +92,16 @@ textarea {
 }
 
 .popup-search-wrap {
-  padding: 10px;
+  padding: 8px;
 }
 
 .search-input {
   width: 100%;
   border: 0;
-  border-radius: 18px;
+  border-radius: 16px;
   background: var(--surface-muted);
-  min-height: 48px;
-  padding: 0 16px;
+  min-height: 42px;
+  padding: 0 14px;
   color: var(--text);
   outline: none;
   transition: box-shadow var(--transition), background var(--transition);
@@ -113,7 +113,7 @@ textarea {
 }
 
 .popup-list-wrap {
-  min-height: 360px;
+  min-height: 320px;
 }
 
 .hidden,
@@ -123,9 +123,9 @@ textarea {
 
 .popup-add-button {
   width: 100%;
-  min-height: 52px;
+  min-height: 46px;
   border: 0;
-  border-radius: 18px;
+  border-radius: 16px;
   background: linear-gradient(180deg, #e03d43 0%, #ca2b31 100%);
   color: #fff;
   font-weight: 700;
@@ -150,7 +150,7 @@ textarea {
   z-index: 5;
   display: grid;
   place-items: center;
-  padding: 14px;
+  padding: 10px;
 }
 
 .popup-editor-backdrop {
@@ -163,24 +163,29 @@ textarea {
 .popup-editor-topbar {
   display: flex;
   justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 12px;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .popup-editor-view {
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 480px;
+  max-width: 420px;
+  max-height: calc(100vh - 20px);
+  display: flex;
+  flex-direction: column;
 }
 
 .popup-editor-shell {
-  padding: 18px;
+  padding: 14px;
   animation: pop-in 180ms ease both;
+  max-height: calc(100vh - 66px);
+  overflow-y: auto;
 }
 
 .popup-editor-head {
-  margin-bottom: 14px;
+  margin-bottom: 10px;
 }
 
 .popup-editor-eyebrow,
@@ -190,61 +195,61 @@ textarea {
 
 .popup-editor-eyebrow {
   color: var(--accent);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .popup-editor-title {
-  margin-top: 8px;
-  font-size: 22px;
+  margin-top: 6px;
+  font-size: 18px;
   line-height: 1.1;
 }
 
 .popup-editor-form {
   display: grid;
-  gap: 14px;
+  gap: 10px;
 }
 
 .popup-field-group {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .popup-field-label {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
 }
 
 .popup-field-help,
 .popup-error-text {
   color: var(--text-soft);
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .popup-error-text {
-  min-height: 14px;
+  min-height: 12px;
 }
 
 .popup-field-input,
 .popup-field-textarea {
   width: 100%;
   border: 0;
-  border-radius: 16px;
+  border-radius: 14px;
   background: var(--surface-muted);
   color: var(--text);
   outline: none;
 }
 
 .popup-field-input {
-  min-height: 46px;
-  padding: 0 14px;
+  min-height: 38px;
+  padding: 0 12px;
 }
 
 .popup-field-textarea {
-  min-height: 132px;
-  padding: 14px;
+  min-height: 92px;
+  padding: 12px;
   resize: vertical;
 }
 
@@ -259,7 +264,11 @@ textarea {
 .popup-editor-actions-right {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+}
+
+.popup-toggle-row {
+  align-items: flex-start;
 }
 
 .popup-editor-actions {
@@ -274,8 +283,9 @@ textarea {
 
 .switch {
   position: relative;
-  width: 54px;
-  height: 32px;
+  width: 50px;
+  height: 30px;
+  flex: 0 0 auto;
 }
 
 .switch input {
@@ -298,8 +308,8 @@ textarea {
   position: absolute;
   top: 4px;
   left: 4px;
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   background: #fff;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.14);
@@ -312,16 +322,16 @@ textarea {
 }
 
 .switch input:checked + .switch-track::after {
-  transform: translateX(22px);
+  transform: translateX(20px);
 }
 
 .popup-secondary-button,
 .popup-primary-button,
 .popup-danger-button {
   border: 0;
-  border-radius: 16px;
-  min-height: 44px;
-  padding: 0 16px;
+  border-radius: 14px;
+  min-height: 38px;
+  padding: 0 14px;
   cursor: pointer;
   font-weight: 700;
   transition: transform var(--transition), box-shadow var(--transition), filter var(--transition);
