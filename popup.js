@@ -225,16 +225,12 @@ async function initPopup() {
         return;
       }
 
-      const savedShortcut = await BRNVData.upsertShortcut(values, popupState.settings.caseSensitive);
+      await BRNVData.upsertShortcut(values, popupState.settings.caseSensitive);
       const syncData = await BRNVData.getSyncData();
       popupState.shortcuts = syncData.shortcuts;
       popupState.folders = syncData.folders;
       renderPopupResults();
-      if (isCreateMode) {
-        showPopupEditorView(savedShortcut?.id || null, "edit");
-        return;
-      }
-      showPopupEditorView(values.id, "edit");
+      showPopupListView();
     } catch (error) {
       console.error("Failed to save shortcut from popup", error);
     }
