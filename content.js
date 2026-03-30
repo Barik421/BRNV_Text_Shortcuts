@@ -13,6 +13,20 @@
 
   const CONTENTEDITABLE_SELECTOR = "[contenteditable]:not([contenteditable='false'])";
 
+  function getCandidateTarget(target) {
+    if (target) {
+      return target;
+    }
+
+    const active = document.activeElement;
+    if (active) {
+      return active;
+    }
+
+    const selection = window.getSelection();
+    return selection?.anchorNode || null;
+  }
+
   function getEditableRoot(target) {
     if (!target) {
       return null;
@@ -103,6 +117,16 @@
     descriptor?.set?.call(target, value);
   }
 
+  function dispatchTextInputEvents(target, text) {
+    target.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
+
+    try {
+      target.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: text }));
+    } catch (_error) {
+      // Some pages/polyfills behave better with a plain Event only.
+    }
+  }
+
   function replaceInInput(target, shortcut) {
     const caret = target.selectionStart;
     if (caret == null) {
@@ -121,7 +145,7 @@
     setNativeInputValue(target, nextValue);
     const nextCaret = replacementStart + shortcut.content.length;
     target.setSelectionRange(nextCaret, nextCaret);
-    target.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: shortcut.content }));
+    dispatchTextInputEvents(target, shortcut.content);
     markReplacement(target, shortcut.content);
     recordExpansion(shortcut.id);
     return true;
@@ -197,7 +221,7 @@
     selection.removeAllRanges();
     selection.addRange(caretRange);
 
-    target.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: shortcut.content }));
+    dispatchTextInputEvents(target, shortcut.content);
     markReplacement(target, shortcut.content);
     recordExpansion(shortcut.id);
     return true;
@@ -208,9 +232,10 @@
       return;
     }
 
-    const editableRoot = target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement
-      ? target
-      : getEditableRoot(target);
+    const candidate = getCandidateTarget(target);
+    const editableRoot = candidate instanceof HTMLInputElement || candidate instanceof HTMLTextAreaElement
+      ? candidate
+      : getEditableRoot(candidate);
 
     if (!isTextControl(editableRoot)) {
       return;
@@ -254,6 +279,10 @@
       }
     });
 
+    document.addEventListener("beforeinput", (event) => {
+      maybeExpand(event.target);
+    }, true);
+
     document.addEventListener("input", (event) => {
       maybeExpand(event.target);
     }, true);
@@ -270,5 +299,7 @@
     }, true);
   }
 
-  bootstrap();
+  bootstrap().catch((error) => {
+    console.error("BRNV Text Shortcuts content bootstrap failed", error);
+  });
 })();
