@@ -48,7 +48,7 @@ function renderPopupEditor() {
   document.querySelector('label[for="popupShortcutName"]').textContent = popupText("name");
   document.querySelector('label[for="popupShortcutTrigger"]').textContent = popupText("triggerCode");
   document.querySelector('label[for="popupShortcutContent"]').textContent = popupText("textContent");
-  document.querySelector(".popup-field-help").textContent = popupText("triggerHelp");
+  document.getElementById("popupTriggerHelp").textContent = popupText("triggerHelp");
   document.getElementById("popupEnabledLabel").textContent = popupText("enabled");
   document.getElementById("popupEnabledHelp").textContent = popupText("enabledHelp");
   document.getElementById("popupDeleteButton").textContent = popupText("delete");
@@ -202,7 +202,8 @@ async function initPopup() {
   document.getElementById("popupShortcutForm").addEventListener("submit", async (event) => {
     event.preventDefault();
     const shortcut = getPopupSelectedShortcut();
-    if (!shortcut) {
+    const isCreateMode = popupState.editorMode === "create";
+    if (!shortcut && !isCreateMode) {
       return;
     }
 
@@ -224,7 +225,7 @@ async function initPopup() {
     popupState.shortcuts = syncData.shortcuts;
     popupState.folders = syncData.folders;
     renderPopupResults();
-    if (popupState.editorMode === "create") {
+    if (isCreateMode) {
       showPopupEditorView(savedShortcut?.id || null, "edit");
       return;
     }

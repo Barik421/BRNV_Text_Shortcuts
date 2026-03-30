@@ -10,13 +10,13 @@
     <main class="popup-shell">
       <section id="popupListView">
         <header class="popup-topbar">
-          <button id="openDashboardButton" class="icon-button primary-chip" type="button"></button>
-          <button id="openSettingsButton" class="icon-button" type="button" aria-label="Settings"></button>
+          <button id="openDashboardButton" class="icon-button primary-chip" type="button">Open Dashboard</button>
+          <button id="openSettingsButton" class="icon-button" type="button" aria-label="Settings">Settings</button>
         </header>
 
         <section class="popup-search-wrap glass-card">
-          <label class="sr-only" for="popupSearch"></label>
-          <input id="popupSearch" class="search-input" type="search" autocomplete="off">
+          <label class="sr-only" for="popupSearch">Search shortcuts</label>
+          <input id="popupSearch" class="search-input" type="search" autocomplete="off" placeholder="Search shortcuts">
         </section>
 
         <section class="popup-list-wrap">
@@ -24,47 +24,47 @@
           <div id="popupResults" class="result-list"></div>
         </section>
 
-        <button id="popupAddShortcutButton" class="popup-add-button" type="button"></button>
+        <button id="popupAddShortcutButton" class="popup-add-button" type="button">Add Shortcut</button>
       </section>
 
       <div id="popupEditorOverlay" class="popup-editor-overlay hidden">
         <div class="popup-editor-backdrop"></div>
-        <section id="popupEditorView" class="popup-editor-view">
+        <section id="popupEditorView" class="popup-editor-view" role="dialog" aria-modal="true">
           <header class="popup-editor-topbar">
-            <button id="popupBackButton" class="icon-button" type="button"></button>
-            <button id="popupEditorSettingsButton" class="icon-button" type="button" aria-label="Settings"></button>
+            <button id="popupBackButton" class="icon-button" type="button">Back</button>
+            <button id="popupEditorSettingsButton" class="icon-button" type="button" aria-label="Settings">Settings</button>
           </header>
 
           <div class="popup-editor-shell glass-card">
             <div class="popup-editor-head">
-              <p id="popupEditorEyebrow" class="popup-editor-eyebrow"></p>
-              <h2 id="popupEditorTitle" class="popup-editor-title"></h2>
+              <p id="popupEditorEyebrow" class="popup-editor-eyebrow">Shortcut editor</p>
+              <h2 id="popupEditorTitle" class="popup-editor-title">Create shortcut</h2>
             </div>
 
             <form id="popupShortcutForm" class="popup-editor-form">
               <div class="popup-field-group">
-                <label class="popup-field-label" for="popupShortcutName"></label>
+                <label class="popup-field-label" for="popupShortcutName">Name</label>
                 <input id="popupShortcutName" class="popup-field-input" type="text" maxlength="80">
                 <div id="popupNameError" class="popup-error-text"></div>
               </div>
 
               <div class="popup-field-group">
-                <label class="popup-field-label" for="popupShortcutTrigger"></label>
+                <label class="popup-field-label" for="popupShortcutTrigger">Trigger Code</label>
                 <input id="popupShortcutTrigger" class="popup-field-input" type="text" maxlength="80" autocapitalize="off" autocomplete="off" spellcheck="false">
-                <div class="popup-field-help"></div>
+                <div id="popupTriggerHelp" class="popup-field-help">Trigger codes must stay unique and cannot be prefixes of each other.</div>
                 <div id="popupTriggerError" class="popup-error-text"></div>
               </div>
 
               <div class="popup-field-group">
-                <label class="popup-field-label" for="popupShortcutContent"></label>
+                <label class="popup-field-label" for="popupShortcutContent">Text Content</label>
                 <textarea id="popupShortcutContent" class="popup-field-textarea"></textarea>
                 <div id="popupContentError" class="popup-error-text"></div>
               </div>
 
               <div class="popup-toggle-row">
                 <div>
-                  <div class="popup-field-label" id="popupEnabledLabel"></div>
-                  <div class="popup-field-help" id="popupEnabledHelp"></div>
+                  <div class="popup-field-label" id="popupEnabledLabel">Enabled</div>
+                  <div class="popup-field-help" id="popupEnabledHelp">Disabled shortcuts stay saved but do not expand on websites.</div>
                 </div>
                 <label class="switch">
                   <input id="popupShortcutEnabled" type="checkbox">
@@ -73,10 +73,10 @@
               </div>
 
               <div class="popup-editor-actions">
-                <button id="popupDeleteButton" class="popup-danger-button" type="button"></button>
+                <button id="popupDeleteButton" class="popup-danger-button" type="button">Delete</button>
                 <div class="popup-editor-actions-right">
-                  <button id="popupCancelButton" class="popup-secondary-button" type="button"></button>
-                  <button id="popupSaveButton" class="popup-primary-button" type="submit"></button>
+                  <button id="popupCancelButton" class="popup-secondary-button" type="button">Cancel</button>
+                  <button id="popupSaveButton" class="popup-primary-button" type="submit">Save</button>
                 </div>
               </div>
             </form>
