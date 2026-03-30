@@ -102,6 +102,7 @@ const BRNVI18n = (() => {
       triggerCode: "Trigger Code",
       triggerHelp: "Trigger codes must stay unique and cannot be prefixes of each other.",
       usageTrend: "Usage trend",
+      walletCopied: "Wallet copied",
       year: "Year"
     },
     uk: {
@@ -206,6 +207,7 @@ const BRNVI18n = (() => {
       triggerCode: "Тригер",
       triggerHelp: "Тригери мають бути унікальними й не можуть бути префіксами один одного.",
       usageTrend: "Динаміка використання",
+      walletCopied: "Гаманець скопійовано",
       year: "Рік"
     }
   };

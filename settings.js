@@ -59,13 +59,13 @@ function openSupportModal() {
       </div>
       <p class="modal-copy">${settingsText("supportModalCopy")}</p>
       <div class="support-wallet">
-        <p class="support-thanks">${settingsText("supportThanks")}</p>
         <p class="support-network">USDT TRC20</p>
         <button id="copyWalletButton" class="wallet-code" type="button">TKQF5fJQ6VLZJka7xZyYKCUScWWJphm6tW</button>
       </div>
       <div class="modal-actions">
         <button id="closeSupportModalAction" class="secondary-button" type="button">${settingsText("close")}</button>
       </div>
+      <div id="copyToast" class="copy-toast hidden">${settingsText("walletCopied")}</div>
     </div>
   `;
   root.classList.remove("hidden");
@@ -75,6 +75,12 @@ function openSupportModal() {
   root.querySelector("#closeSupportModalAction").addEventListener("click", close);
   root.querySelector("#copyWalletButton").addEventListener("click", async () => {
     await navigator.clipboard.writeText("TKQF5fJQ6VLZJka7xZyYKCUScWWJphm6tW");
+    const toast = root.querySelector("#copyToast");
+    toast.classList.remove("hidden");
+    clearTimeout(window.brnvCopyToastTimer);
+    window.brnvCopyToastTimer = setTimeout(() => {
+      toast.classList.add("hidden");
+    }, 5000);
   });
   root.addEventListener("click", (event) => {
     if (event.target === root) {
