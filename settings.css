@@ -390,7 +390,16 @@ html[data-theme="dark"] .secondary-button {
   font-size: 14px;
   white-space: nowrap;
   box-shadow: 0 18px 30px rgba(217, 48, 54, 0.24);
-  animation: modal-in 160ms ease both;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px) scale(0.98);
+  transition: opacity 160ms ease, transform 160ms ease, visibility 160ms ease;
+}
+
+.copy-toast.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
 }
 
 .hidden {

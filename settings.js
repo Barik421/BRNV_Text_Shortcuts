@@ -65,7 +65,7 @@ function openSupportModal() {
       <div class="modal-actions">
         <button id="closeSupportModalAction" class="secondary-button" type="button">${settingsText("close")}</button>
       </div>
-      <div id="copyToast" class="copy-toast hidden">${settingsText("walletCopied")}</div>
+      <div id="copyToast" class="copy-toast">${settingsText("walletCopied")}</div>
     </div>
   `;
   root.classList.remove("hidden");
@@ -76,10 +76,13 @@ function openSupportModal() {
   root.querySelector("#copyWalletButton").addEventListener("click", async () => {
     await navigator.clipboard.writeText("TKQF5fJQ6VLZJka7xZyYKCUScWWJphm6tW");
     const toast = root.querySelector("#copyToast");
-    toast.classList.remove("hidden");
     clearTimeout(window.brnvCopyToastTimer);
+    toast.classList.remove("is-visible");
+    requestAnimationFrame(() => {
+      toast.classList.add("is-visible");
+    });
     window.brnvCopyToastTimer = setTimeout(() => {
-      toast.classList.add("hidden");
+      toast.classList.remove("is-visible");
     }, 1500);
   });
   root.addEventListener("click", (event) => {
