@@ -1,4 +1,9 @@
 (async () => {
+  if (window.__brnvTextShortcutsLoaded) {
+    return;
+  }
+  window.__brnvTextShortcutsLoaded = true;
+
   await BRNVData.ensureDefaults();
 
   const runtimeState = {
