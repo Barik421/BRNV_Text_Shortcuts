@@ -154,6 +154,10 @@ textarea {
   pointer-events: auto;
 }
 
+.popup-editor-overlay.hidden {
+  display: none;
+}
+
 .popup-editor-backdrop {
   position: absolute;
   inset: 0;
