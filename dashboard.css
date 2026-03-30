@@ -305,7 +305,8 @@ textarea {
 }
 
 .hero-search-wrap {
-  position: relative;
+  display: grid;
+  gap: 12px;
 }
 
 .hero-search {
@@ -330,11 +331,6 @@ textarea {
 }
 
 .search-results-dropdown {
-  position: absolute;
-  top: calc(100% + 10px);
-  left: 0;
-  right: 0;
-  z-index: 4;
   padding: 12px;
   border-radius: 24px;
   background: color-mix(in srgb, var(--panel-strong) 96%, #ffffff 4%);
