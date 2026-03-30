@@ -45,6 +45,40 @@ function openSettingsInfoModal({ title, message, actionLabel }) {
   });
 }
 
+function openSupportModal() {
+  const root = document.getElementById("settingsModalRoot");
+  root.innerHTML = `
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2 class="modal-title">${settingsText("supportTitle")}</h2>
+        <button id="closeSupportModalButton" class="close-button" type="button">×</button>
+      </div>
+      <p class="modal-copy">${settingsText("supportModalCopy")}</p>
+      <div class="support-wallet">
+        <p class="support-thanks">${settingsText("supportThanks")}</p>
+        <p class="support-network">USDT TRC20</p>
+        <button id="copyWalletButton" class="wallet-code" type="button">TKQF5fJQ6VLZJka7xZyYKCUScWWJphm6tW</button>
+      </div>
+      <div class="modal-actions">
+        <button id="closeSupportModalAction" class="secondary-button" type="button">${settingsText("close")}</button>
+      </div>
+    </div>
+  `;
+  root.classList.remove("hidden");
+
+  const close = () => closeSettingsModal();
+  root.querySelector("#closeSupportModalButton").addEventListener("click", close);
+  root.querySelector("#closeSupportModalAction").addEventListener("click", close);
+  root.querySelector("#copyWalletButton").addEventListener("click", async () => {
+    await navigator.clipboard.writeText("TKQF5fJQ6VLZJka7xZyYKCUScWWJphm6tW");
+  });
+  root.addEventListener("click", (event) => {
+    if (event.target === root) {
+      close();
+    }
+  }, { once: true });
+}
+
 function openSettingsConfirmModal({ title, message, confirmLabel }) {
   return new Promise((resolve) => {
     const root = document.getElementById("settingsModalRoot");
@@ -88,7 +122,6 @@ function renderSettingsTexts() {
   document.getElementById("backButton").textContent = settingsText("backToDashboard");
   document.getElementById("exportButton").textContent = settingsText("exportShortcuts");
   document.getElementById("importButton").textContent = settingsText("importShortcuts");
-  document.getElementById("disableAllShortcutsButton").textContent = settingsText("disableAllShortcuts");
   document.getElementById("resetStatsButton").textContent = settingsText("resetStatistics");
   document.getElementById("supportToggleButton").textContent = settingsText("supportButton");
 }
@@ -104,6 +137,7 @@ async function loadSettings() {
   document.getElementById("caseSensitiveToggle").checked = settingsState.settings.caseSensitive;
   document.getElementById("expansionToggle").checked = settingsState.settings.expansionEnabled;
   document.getElementById("syncInfoText").textContent = settingsText("syncInfoCopy");
+  document.getElementById("disableAllToggle").checked = syncData.shortcuts.length > 0 && syncData.shortcuts.every((shortcut) => !shortcut.enabled);
 }
 
 async function updateSetting(key, value) {
@@ -204,6 +238,7 @@ async function disableAllShortcutsAction() {
     title: settingsText("disableAllShortcuts"),
     message: settingsText("disableAllShortcutsDone")
   });
+  await loadSettings();
 }
 
 async function initSettings() {
@@ -236,14 +271,15 @@ async function initSettings() {
       event.target.value = "";
     }
   });
-  document.getElementById("disableAllShortcutsButton").addEventListener("click", disableAllShortcutsAction);
+  document.getElementById("disableAllToggle").addEventListener("change", async (event) => {
+    if (!event.target.checked) {
+      await loadSettings();
+      return;
+    }
+    await disableAllShortcutsAction();
+  });
   document.getElementById("resetStatsButton").addEventListener("click", resetStatistics);
-  document.getElementById("supportToggleButton").addEventListener("click", () => {
-    document.getElementById("supportWalletPanel").classList.toggle("hidden");
-  });
-  document.getElementById("copyWalletButton").addEventListener("click", async () => {
-    await navigator.clipboard.writeText("TKQF5fJQ6VLZJka7xZyYKCUScWWJphm6tW");
-  });
+  document.getElementById("supportToggleButton").addEventListener("click", openSupportModal);
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
       const root = document.getElementById("settingsModalRoot");

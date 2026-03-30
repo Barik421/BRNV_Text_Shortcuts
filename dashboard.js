@@ -256,6 +256,60 @@ function renderShortcuts() {
   });
 }
 
+function renderDashboardSearchResults() {
+  const section = document.getElementById("dashboardSearchResultsSection");
+  const node = document.getElementById("dashboardSearchResultsList");
+  const query = dashboardState.search.trim().toLowerCase();
+
+  if (!query) {
+    section.classList.add("hidden");
+    node.innerHTML = "";
+    return;
+  }
+
+  const matches = dashboardState.shortcuts.filter((shortcut) => {
+    const haystack = [shortcut.name, shortcut.trigger, shortcut.content].join("\n").toLowerCase();
+    return haystack.includes(query);
+  });
+
+  section.classList.remove("hidden");
+  node.innerHTML = "";
+
+  if (!matches.length) {
+    const empty = document.createElement("div");
+    empty.className = "summary-card";
+    empty.innerHTML = `<p class="summary-label">${dashboardText("emptySearch")}</p>`;
+    node.appendChild(empty);
+    return;
+  }
+
+  matches.forEach((shortcut) => {
+    const card = document.createElement("article");
+    card.className = `shortcut-card ${shortcut.enabled ? "" : "disabled"}`;
+    card.innerHTML = `
+      <div class="shortcut-head">
+        <h3></h3>
+        <span class="badge trigger"></span>
+      </div>
+      <p class="shortcut-preview"></p>
+      <div class="inline-row">
+        <span class="badge status"></span>
+        <span class="shortcut-meta"></span>
+      </div>
+    `;
+
+    card.querySelector("h3").textContent = shortcut.name;
+    card.querySelector(".badge.trigger").textContent = shortcut.trigger;
+    card.querySelector(".shortcut-preview").textContent = shortcut.content.replace(/\s+/g, " ").trim().slice(0, 120);
+    card.querySelector(".badge.status").textContent = shortcut.enabled ? dashboardText("enabled") : dashboardText("disabled");
+
+    const folder = dashboardState.folders.find((item) => item.id === shortcut.folderId);
+    card.querySelector(".shortcut-meta").textContent = folder ? folder.name : dashboardText("generalFolder");
+    card.addEventListener("click", () => openShortcutEditor(shortcut.id));
+    node.appendChild(card);
+  });
+}
+
 function renderFolderView() {
   return;
 }
@@ -725,6 +779,7 @@ async function refreshDashboard() {
   renderStaticTexts();
   renderSummary();
   renderFolders();
+  renderDashboardSearchResults();
 
   if (dashboardState.currentFolderId) {
     openFolderScreen(dashboardState.currentFolderId);
@@ -757,6 +812,7 @@ async function initDashboard() {
 
   document.getElementById("dashboardSearch").addEventListener("input", (event) => {
     dashboardState.search = event.target.value;
+    renderDashboardSearchResults();
 
     if (dashboardState.currentFolderId) {
       renderShortcuts();

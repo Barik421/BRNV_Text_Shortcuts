@@ -56,10 +56,20 @@
           </div>
         </div>
 
+        <div class="setting-row">
+          <div>
+            <h2 data-i18n="disableAllShortcuts"></h2>
+            <p data-i18n="disableAllShortcutsHelp"></p>
+          </div>
+          <label class="switch">
+            <input id="disableAllToggle" type="checkbox">
+            <span class="switch-track"></span>
+          </label>
+        </div>
+
         <div class="actions-grid">
           <button id="exportButton" class="primary-button" type="button"></button>
           <button id="importButton" class="secondary-button" type="button"></button>
-          <button id="disableAllShortcutsButton" class="danger-button" type="button"></button>
           <button id="resetStatsButton" class="danger-button" type="button"></button>
         </div>
         <input id="importFileInput" type="file" accept="application/json" hidden>
@@ -72,11 +82,6 @@
             <p data-i18n="supportDescription"></p>
           </div>
           <button id="supportToggleButton" class="support-button" type="button"></button>
-          <div id="supportWalletPanel" class="support-wallet hidden">
-            <p class="support-thanks" data-i18n="supportThanks"></p>
-            <p class="support-network">USDT TRC20</p>
-            <button id="copyWalletButton" class="wallet-code" type="button">TKQF5fJQ6VLZJka7xZyYKCUScWWJphm6tW</button>
-          </div>
         </section>
 
         <section class="contact-card">
