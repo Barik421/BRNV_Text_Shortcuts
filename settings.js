@@ -80,7 +80,7 @@ function openSupportModal() {
     clearTimeout(window.brnvCopyToastTimer);
     window.brnvCopyToastTimer = setTimeout(() => {
       toast.classList.add("hidden");
-    }, 5000);
+    }, 1500);
   });
   root.addEventListener("click", (event) => {
     if (event.target === root) {
