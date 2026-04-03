@@ -4,9 +4,7 @@
   "description": "A clean, folder-based text shortcut and text expander extension for Chrome.",
   "version": "1.0.0",
   "permissions": [
-    "storage",
-    "scripting",
-    "tabs"
+    "storage"
   ],
   "host_permissions": [
     "<all_urls>"

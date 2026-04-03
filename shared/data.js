@@ -21,15 +21,39 @@ const BRNVData = (() => {
   };
 
   function storageGet(area, keys) {
-    return new Promise((resolve) => chrome.storage[area].get(keys, resolve));
+    return new Promise((resolve, reject) => {
+      chrome.storage[area].get(keys, (result) => {
+        if (chrome.runtime.lastError) {
+          reject(new Error(chrome.runtime.lastError.message));
+          return;
+        }
+        resolve(result);
+      });
+    });
   }
 
   function storageSet(area, values) {
-    return new Promise((resolve) => chrome.storage[area].set(values, resolve));
+    return new Promise((resolve, reject) => {
+      chrome.storage[area].set(values, () => {
+        if (chrome.runtime.lastError) {
+          reject(new Error(chrome.runtime.lastError.message));
+          return;
+        }
+        resolve();
+      });
+    });
   }
 
   function storageRemove(area, keys) {
-    return new Promise((resolve) => chrome.storage[area].remove(keys, resolve));
+    return new Promise((resolve, reject) => {
+      chrome.storage[area].remove(keys, () => {
+        if (chrome.runtime.lastError) {
+          reject(new Error(chrome.runtime.lastError.message));
+          return;
+        }
+        resolve();
+      });
+    });
   }
 
   function nowIso() {
