@@ -215,6 +215,7 @@ textarea {
   position: sticky;
   bottom: 0;
   z-index: 2;
+  margin-bottom: 8px;
 }
 
 .popup-add-button:hover {
