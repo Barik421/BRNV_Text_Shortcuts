@@ -7,6 +7,30 @@ const popupState = {
   editorMode: "edit"
 };
 
+function handlePopupEditorKeydown(event) {
+  const overlay = document.getElementById("popupEditorOverlay");
+  if (!overlay || overlay.classList.contains("hidden")) {
+    return;
+  }
+
+  if (event.key === "Escape") {
+    showPopupListView();
+    event.preventDefault();
+    event.stopPropagation();
+    return;
+  }
+
+  if (event.key === "Enter" && event.target.tagName !== "TEXTAREA") {
+    const form = document.getElementById("popupShortcutForm");
+    if (!form) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    form.requestSubmit();
+  }
+}
+
 function popupText(key) {
   return BRNVI18n.t(popupState.language, key);
 }
@@ -240,13 +264,7 @@ async function initPopup() {
       console.error("Failed to save shortcut from popup", error);
     }
   });
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !document.getElementById("popupEditorOverlay").classList.contains("hidden")) {
-      showPopupListView();
-      event.preventDefault();
-      event.stopPropagation();
-    }
-  }, true);
+  document.addEventListener("keydown", handlePopupEditorKeydown, true);
 
   renderPopupResults();
 }
