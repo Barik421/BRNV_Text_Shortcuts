@@ -96,9 +96,7 @@ body {
   min-width: 360px;
   min-height: 540px;
   height: 100%;
-  background:
-    radial-gradient(circle at top right, rgba(217, 48, 54, 0.12), transparent 34%),
-    linear-gradient(180deg, color-mix(in srgb, var(--bg) 72%, #ffffff 28%) 0%, var(--bg) 100%);
+  background: var(--bg);
   color: var(--text);
   font-family: "SF Pro Display", "Segoe UI", sans-serif;
 }
