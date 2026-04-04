@@ -496,6 +496,7 @@ textarea {
   width: 180px;
   height: 180px;
   background: radial-gradient(circle, rgba(217, 48, 54, 0.22), transparent 70%);
+  pointer-events: none;
 }
 
 .folder-card::after {
@@ -517,6 +518,11 @@ textarea {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+}
+
+.folder-card > * {
+  position: relative;
+  z-index: 1;
 }
 
 .folder-card h3,
