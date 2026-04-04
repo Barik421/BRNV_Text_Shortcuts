@@ -708,12 +708,21 @@ function openShortcutEditor(shortcutId = null) {
     closeModal(root);
   };
   const handleKeydown = (event) => {
+    if (document.getElementById("approveConfirmButton")) {
+      return;
+    }
+
+    const form = root.querySelector("#shortcutForm");
+    if (!form) {
+      return;
+    }
+
     if (event.key === "Enter" && event.target.tagName !== "TEXTAREA") {
       const activeModal = document.getElementById("modalRoot");
       if (activeModal && !activeModal.classList.contains("hidden")) {
         event.preventDefault();
         event.stopPropagation();
-        root.querySelector("#shortcutForm").requestSubmit();
+        form.requestSubmit();
       }
     }
   };
