@@ -94,7 +94,7 @@ html,
 body {
   margin: 0;
   min-width: 360px;
-  min-height: 480px;
+  min-height: 540px;
   height: 100%;
   background:
     radial-gradient(circle at top right, rgba(217, 48, 54, 0.12), transparent 34%),
@@ -114,7 +114,7 @@ textarea {
   padding: 12px;
   position: relative;
   z-index: 1;
-  min-height: 480px;
+  min-height: 540px;
   height: 100%;
 }
 
@@ -125,10 +125,7 @@ textarea {
 }
 
 #popupListView {
-  height: 100%;
-  min-height: 0;
-  display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  min-height: 100%;
 }
 
 .popup-topbar {
@@ -194,9 +191,9 @@ textarea {
 
 .popup-list-wrap {
   min-height: 0;
-  height: 100%;
+  flex: 1;
   overflow-y: auto;
-  padding-bottom: 12px;
+  padding-bottom: 10px;
   padding-right: 2px;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -223,7 +220,9 @@ textarea {
   cursor: pointer;
   box-shadow: 0 18px 28px rgba(217, 48, 54, 0.22);
   transition: transform var(--transition), box-shadow var(--transition), filter var(--transition);
-  margin-top: 2px;
+  position: sticky;
+  bottom: 8px;
+  z-index: 2;
 }
 
 .popup-add-button:hover {
