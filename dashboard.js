@@ -456,9 +456,20 @@ function openInfoModal({ title, message }) {
   `;
   root.classList.remove("hidden");
 
-  const close = () => closeModal(root);
+  const handleKeydown = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      event.stopPropagation();
+      close();
+    }
+  };
+  const close = () => {
+    document.removeEventListener("keydown", handleKeydown, true);
+    closeModal(root);
+  };
   root.querySelector("#closeInfoButton").addEventListener("click", close);
   root.querySelector("#closeInfoPrimaryButton").addEventListener("click", close);
+  document.addEventListener("keydown", handleKeydown, true);
   root.addEventListener("click", (event) => {
     if (event.target === root) {
       close();
@@ -487,13 +498,23 @@ function openConfirmModal({ title, message, confirmLabel, danger = false }) {
     root.classList.remove("hidden");
 
     const finish = (value) => {
+      document.removeEventListener("keydown", handleKeydown, true);
       closeModal(root);
       resolve(value);
+    };
+
+    const handleKeydown = (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        event.stopPropagation();
+        finish(true);
+      }
     };
 
     root.querySelector("#closeConfirmButton").addEventListener("click", () => finish(false));
     root.querySelector("#cancelConfirmButton").addEventListener("click", () => finish(false));
     root.querySelector("#approveConfirmButton").addEventListener("click", () => finish(true));
+    document.addEventListener("keydown", handleKeydown, true);
     root.addEventListener("click", (event) => {
       if (event.target === root) {
         finish(false);
@@ -534,12 +555,22 @@ function openFolderModal(folder = null) {
     input.select();
 
     const finish = (value) => {
+      document.removeEventListener("keydown", handleKeydown, true);
       closeModal(root);
       resolve(value);
     };
 
+    const handleKeydown = (event) => {
+      if (event.key === "Enter" && event.target !== input) {
+        event.preventDefault();
+        event.stopPropagation();
+        root.querySelector("#folderModalForm").requestSubmit();
+      }
+    };
+
     root.querySelector("#closeFolderModalButton").addEventListener("click", () => finish(null));
     root.querySelector("#cancelFolderModalButton").addEventListener("click", () => finish(null));
+    document.addEventListener("keydown", handleKeydown, true);
     root.addEventListener("click", (event) => {
       if (event.target === root) {
         finish(null);
@@ -672,11 +703,27 @@ function openShortcutEditor(shortcutId = null) {
     return !errors.name && !errors.trigger && !errors.content;
   }
 
-  root.querySelector("#closeEditorButton").addEventListener("click", () => closeModal(root));
-  root.querySelector("#cancelShortcutButton").addEventListener("click", () => closeModal(root));
+  const closeEditor = () => {
+    document.removeEventListener("keydown", handleKeydown, true);
+    closeModal(root);
+  };
+  const handleKeydown = (event) => {
+    if (event.key === "Enter" && event.target.tagName !== "TEXTAREA") {
+      const activeModal = document.getElementById("modalRoot");
+      if (activeModal && !activeModal.classList.contains("hidden")) {
+        event.preventDefault();
+        event.stopPropagation();
+        root.querySelector("#shortcutForm").requestSubmit();
+      }
+    }
+  };
+
+  root.querySelector("#closeEditorButton").addEventListener("click", closeEditor);
+  root.querySelector("#cancelShortcutButton").addEventListener("click", closeEditor);
+  document.addEventListener("keydown", handleKeydown, true);
   root.addEventListener("click", (event) => {
     if (event.target === root) {
-      closeModal(root);
+      closeEditor();
     }
   });
 
@@ -684,7 +731,7 @@ function openShortcutEditor(shortcutId = null) {
     root.querySelector("#duplicateShortcutButton").addEventListener("click", async () => {
       const duplicate = BRNVData.makeDuplicateShortcut(shortcut, dashboardState.shortcuts, dashboardState.settings.caseSensitive);
       await BRNVData.upsertShortcut(duplicate, dashboardState.settings.caseSensitive);
-      closeModal(root);
+      closeEditor();
       await refreshDashboard();
       openShortcutEditor(duplicate.id);
     });
@@ -701,7 +748,7 @@ function openShortcutEditor(shortcutId = null) {
       }
 
       await BRNVData.deleteShortcut(shortcut.id);
-      closeModal(root);
+      closeEditor();
       await refreshDashboard();
     });
   }
@@ -723,7 +770,7 @@ function openShortcutEditor(shortcutId = null) {
     }
 
     await BRNVData.upsertShortcut(values, dashboardState.settings.caseSensitive);
-    closeModal(root);
+    closeEditor();
     await refreshDashboard();
   });
 }

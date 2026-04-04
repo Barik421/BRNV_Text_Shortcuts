@@ -35,12 +35,22 @@ function openSettingsInfoModal({ title, message, actionLabel }) {
     root.classList.remove("hidden");
 
     const finish = () => {
+      document.removeEventListener("keydown", handleKeydown, true);
       closeSettingsModal();
       resolve();
     };
 
+    const handleKeydown = (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        event.stopPropagation();
+        finish();
+      }
+    };
+
     root.querySelector("#closeSettingsInfoButton").addEventListener("click", finish);
     root.querySelector("#confirmSettingsInfoButton").addEventListener("click", finish);
+    document.addEventListener("keydown", handleKeydown, true);
     root.addEventListener("click", (event) => {
       if (event.target === root) {
         finish();
@@ -70,9 +80,20 @@ function openSupportModal() {
   `;
   root.classList.remove("hidden");
 
-  const close = () => closeSettingsModal();
+  const handleKeydown = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      event.stopPropagation();
+      close();
+    }
+  };
+  const close = () => {
+    document.removeEventListener("keydown", handleKeydown, true);
+    closeSettingsModal();
+  };
   root.querySelector("#closeSupportModalButton").addEventListener("click", close);
   root.querySelector("#closeSupportModalAction").addEventListener("click", close);
+  document.addEventListener("keydown", handleKeydown, true);
   root.querySelector("#copyWalletButton").addEventListener("click", async () => {
     await navigator.clipboard.writeText("TKQF5fJQ6VLZJka7xZyYKCUScWWJphm6tW");
     const toast = root.querySelector("#copyToast");
@@ -111,13 +132,23 @@ function openSettingsConfirmModal({ title, message, confirmLabel }) {
     root.classList.remove("hidden");
 
     const finish = (value) => {
+      document.removeEventListener("keydown", handleKeydown, true);
       closeSettingsModal();
       resolve(value);
+    };
+
+    const handleKeydown = (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        event.stopPropagation();
+        finish(true);
+      }
     };
 
     root.querySelector("#closeSettingsConfirmButton").addEventListener("click", () => finish(false));
     root.querySelector("#cancelSettingsConfirmButton").addEventListener("click", () => finish(false));
     root.querySelector("#approveSettingsConfirmButton").addEventListener("click", () => finish(true));
+    document.addEventListener("keydown", handleKeydown, true);
     root.addEventListener("click", (event) => {
       if (event.target === root) {
         finish(false);
