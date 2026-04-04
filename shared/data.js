@@ -345,10 +345,14 @@ const BRNVData = (() => {
 
     const seen = new Set();
     shortcuts.forEach((shortcut) => {
-      if (!shortcut.name || !shortcut.trigger || !shortcut.content) {
+      const name = String(shortcut.name || "").trim();
+      const trigger = String(shortcut.trigger || "").trim();
+      const content = String(shortcut.content || "").trim();
+
+      if (!name || !trigger || !content) {
         throw new Error("Shortcut is missing required fields.");
       }
-      const key = normalizeTrigger(shortcut.trigger, settings.caseSensitive);
+      const key = normalizeTrigger(trigger, settings.caseSensitive);
       if (seen.has(key)) {
         throw new Error("Duplicate triggers found in import.");
       }
